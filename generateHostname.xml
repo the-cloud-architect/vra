@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="generateHostname" result-type="string" api-version="6.0.0" id="ce448b34-8369-495c-aeaf-08ac5199b2a5" version="0.0.4" allowed-operations="evf" category-name="com.vmware.pso.hostnaming">
+  <description><![CDATA[Generates a custom hostname based on a template. Example format: {CustomProp1_Value}.{CustomProp2_Value)separator####.]]></description>
+  <param n="resolvedHostnameTemplate" t="string"><![CDATA[The resolved hostname template (ex: {Prop1_Value}.{Prop2_Value}separator####) where #'s will be replaced with a generated index]]></param>
+  <param n="startingIndex" t="number"><![CDATA[Starting number if new prefix is being used.]]></param>
+  <script encoded="false"><![CDATA[var defaultRolloverIndex = 1;
+
+try {
+	System.log("Resolved name: " + resolvedHostnameTemplate);
+	var suffixPattern, machinePrefix;
+	try {
+		suffixPattern = resolvedHostnameTemplate.match(/#+/)[0];
+		machinePrefix = resolvedHostnameTemplate.match(/[^#]+/)[0];
+	}
+	catch (e) {
+		System.error(e + "; Empty prefix or suffix, the default will be applied."); // empty prefix or number sufix - error ignore, just log
+	}
+	LockingSystem.lockAndWait("MachinePrefixLock-configElement" , "MachinePrefixLocking");
+	System.log("suffixPattern: " + suffixPattern);
+    var suffix = getNextMachineSuffix(machinePrefix, suffixPattern);
+	if(!suffixPattern) { // if no suffix pattern (###) - apply a valid one
+		suffixPattern = formSuffixPattern(suffix);
+		resolvedHostnameTemplate += suffixPattern;
+	}
+	
+	System.log("suffix: " + suffix);
+	
+    var suffixString = System.formatNumber(suffix, System.getModule("com.vmware.pso.hostnaming").replaceAll(suffixPattern, "#", "0"));
+	System.debug("Suffix string: " + suffixString);
+	
+	if(!checkSuffixLength(suffix, suffixPattern.length)) {
+		throw new Error("Suffix exceeds maximum length of " + suffixPattern.length);
+	}
+	var name = resolvedHostnameTemplate.replace(/([#]+)/, suffixString);		
+	return name;		
+} finally {
+	LockingSystem.unlock("MachinePrefixLock-configElement" , "MachinePrefixLocking");
+}
+
+/*
+	suffix (number) - the calculated number for the undefined suffixPattern - no (###)
+	calculates the length of the curretn suffix and replase it with #
+	return the calculated suffixPattern
+*/
+function formSuffixPattern(suffix) {
+	var length = suffix.toString().length;
+	return Array(length + 1).join("#");
+}
+
+
+function getNextMachineSuffix(machinePrefix, suffixPattern) {
+    System.log("getNextMachineSuffix::machinePrefix: " + machinePrefix);
+    System.log("getNextMachineSuffix::suffixPattern: " + suffixPattern);
+	
+	var config = System.getModule("com.vmware.pso.hostnaming").getConfigurationElement("VMW", "Custom Hostname Tracking");
+	var index = 0;
+
+	if (config) {
+	    System.debug("Generating new machine index.");
+	    config.reload();
+	
+	    var currentIndex = config.getAttributeWithKey(machinePrefix);
+	    if(currentIndex) {
+            index = currentIndex.value;
+	        config.setAttributeWithKey(machinePrefix, index + 1);
+	    } else {
+	        index = startingIndex;
+	        config.setAttributeWithKey(machinePrefix, startingIndex + 1);
+	    }
+
+        // This "if" statement tests to see if the suffix pattern is smaller than the
+        // next number to be used for a suffix.  In other words, it tests for a 
+        // rollover condition.  If this is the case, then set the index to the default
+        // rollover value.
+        if(suffixPattern && suffixPattern.length < index.toString().length) {
+            index = defaultRolloverIndex;
+            config.setAttributeWithKey(machinePrefix, index + 1);
+        }
+
+		System.debug("Next machine index saved.");
+	}
+	else {
+		throw new Error("Configuration file error.");
+	}
+	
+	return index;
+}
+
+function checkSuffixLength(suffix, length) {
+	var suffixLength = suffix.toString().length;
+	
+	return suffixLength <= length;
+}
+]]></script>
+</dunes-script-module>
