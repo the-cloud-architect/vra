@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="applyPolicyToResource" result-type="string" api-version="6.0.0" id="24138cc1-5c1b-4491-b660-76b3b7073729" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vropsapi">
+  <description><![CDATA[Applies a vROPS policy to a resource. Must provide the policy Id and Resource Id as inputs.]]></description>
+  <param n="token" t="string"><![CDATA[Auth Token]]></param>
+  <param n="policyId" t="string"><![CDATA[vROPS Policy Id to apply]]></param>
+  <param n="vropsRestHost" t="REST:RESTHost"><![CDATA[vROPS URL]]></param>
+  <param n="resourceId" t="string"><![CDATA[resource ID to apply policy to]]></param>
+  <script encoded="false"><![CDATA[if (!token)         { throw "No Access Token provided"; }
+if (!vropsRestHost) { throw "No vROPS REST host provided"; }
+if (!policyId)      { throw "No Policy Id provided"; }
+if (!resourceId)    { throw "No Resource Id provided"; }
+
+var url = "/suite-api/internal/policies/apply";
+
+var requestContent = '{ "id": "' + policyId + '", "groups": [ "' + resourceId + '" ] }';
+System.log("requestContent = " + JSON.stringify(requestContent) );
+
+var request = vropsRestHost.createRequest("POST", url, requestContent);
+
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Accept", "application/json");
+request.setHeader("Authorization", "vRealizeOpsToken " + token);
+request.setHeader("X-vRealizeOps-API-use-unsupported", "true");
+
+var requestResponse = request.execute();
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Unable to apply Policy ID " + policyId + " to Resource ID " + resourceId + ".");
+        throw "Error: " + requestResponse.contentAsString;
+    }
+         
+return;
+            
+]]></script>
+</dunes-script-module>

@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="28b5bb89-0b53-4272-a213-c3d4d0ef8592" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[scaleDeployementForChildVm]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="countProperty" type="string">
+      <description><![CDATA[json field that contains the deployment count variable]]></description>
+    </param>
+    <param name="vmName" type="string">
+      <description><![CDATA[name of the VM used to identify deployment to scale ]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="actionResult" type="string"/>
+  </output>
+  <attrib name="token" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="username" type="string" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="username">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="password" type="SecureString" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="password"/>
+  <attrib name="domain" type="string" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="domain">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="casRestHost" type="REST:RESTHost" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="casRestHost"/>
+  <attrib name="countValue" type="number" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[contains current deployment scale count]]></description>
+  </attrib>
+  <attrib name="jsonProperty" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[{}]]></value>
+    <description><![CDATA[contains json object that holds property and value inputs used to control deployment scale]]></description>
+  </attrib>
+  <attrib name="deploymentId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="49.59913565644287" x="696.9918842696824"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item5" type="task" script-module="com.mdg.pso.casapi/getBearerToken">
+    <display-name><![CDATA[getBearerToken]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.casapi").getBearerToken(username, password, domain, casRestHost);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username"/>
+      <bind name="password" type="SecureString" export-name="password"/>
+      <bind name="domain" type="string" export-name="domain"/>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.5" x="129.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item4" type="task" script-module="com.mdg.pso.casapi/getInputFromDeploymentId">
+    <display-name><![CDATA[getInputFromDeploymentId]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.casapi").getInputFromDeploymentId(token, casRestHost, deploymentId, input);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Bearer Token]]></description>
+      </bind>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost">
+        <description><![CDATA[vRA Rest Host]]></description>
+      </bind>
+      <bind name="deploymentId" type="string" export-name="deploymentId">
+        <description><![CDATA[deployment Id]]></description>
+      </bind>
+      <bind name="input" type="string" export-name="countProperty">
+        <description><![CDATA[input value to return]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="number" export-name="countValue"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="59.59913565644287" x="354.9918842696824"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item0" type="task" script-module="com.mdg.pso.casapi/updateDeployementInputs">
+    <display-name><![CDATA[updateDeployementInputs]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.casapi").updateDeployementInputs(token, casRestHost, deploymentId, inputs);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Bearer Token]]></description>
+      </bind>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost">
+        <description><![CDATA[vRA Rest Host]]></description>
+      </bind>
+      <bind name="deploymentId" type="string" export-name="deploymentId">
+        <description><![CDATA[deployment to update]]></description>
+      </bind>
+      <bind name="inputs" type="Properties" export-name="jsonProperty">
+        <description><![CDATA[Input properties to update]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="actionResult"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="59.59913565644287" x="586.9918842696824"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item3" type="task">
+    <display-name><![CDATA[increase count]]></display-name>
+    <script encoded="false"><![CDATA[jsonObject = new Properties();
+
+jsonObject[countProperty] = ++countValue;
+
+jsonProperty = jsonObject;]]></script>
+    <in-binding>
+      <bind name="countProperty" type="string" export-name="countProperty"/>
+      <bind name="countValue" type="number" export-name="countValue"/>
+    </in-binding>
+    <out-binding>
+      <bind name="jsonProperty" type="Properties" export-name="jsonProperty"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="59.59913565644287" x="471.9918842696824"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item2" type="task" script-module="com.mdg.pso.casapi/getDeploymentIdFromVmName">
+    <display-name><![CDATA[getDeploymentIdFromVmName]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.casapi").getDeploymentIdFromVmName(token, casRestHost, vmName);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Bearer Token]]></description>
+      </bind>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost">
+        <description><![CDATA[vRA Rest Host]]></description>
+      </bind>
+      <bind name="vmName" type="string" export-name="vmName">
+        <description><![CDATA[name of VM to look for]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="deploymentId"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="59.79956782822144" x="242.4959421348412"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="countProperty">
+      <desc><![CDATA[json field that contains the deployment count variable]]></desc>
+    </p-param>
+    <p-param name="vmName">
+      <desc><![CDATA[name of the VM used to identify deployment to scale ]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

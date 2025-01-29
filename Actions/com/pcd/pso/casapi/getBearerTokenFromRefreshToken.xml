@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getBearerTokenFromRefreshToken" result-type="string" api-version="6.0.0" id="e64d2d3a-5c37-4d61-9ffa-dcd6a6326a56" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <param n="refreshToken" t="string"/>
+  <param n="casRestHost" t="REST:RESTHost"/>
+  <script encoded="false"><![CDATA[if(refreshToken)
+{
+    if(casRestHost)
+    {
+        try
+        {
+            var url = "/iaas/api/login";
+            var requestContent = '{ "refreshToken": "' + refreshToken + '"}';
+            var request = casRestHost.createRequest("POST", url, requestContent);
+         
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Cache-Control", "no-cache");
+         
+            var requestResponse = request.execute();
+
+            jsonResponse = JSON.parse(requestResponse.contentAsString);
+ 
+            if(requestResponse.statusCode != 200)
+            {
+                System.log("Bearer Token request has returned an error status code: " + requestResponse.statusCode);
+                throw "Error: " + requestResponse.statusCode + " " + requestResponse.serverMessage;
+            }
+         
+            var bearerToken = jsonResponse.token;
+            System.log("bearer Token: " + bearerToken);        
+            return bearerToken;
+            
+        }
+        catch(e)
+        {
+            System.log(e);
+            throw e;
+        }
+    }
+    else
+    {
+        throw "No CAS REST host provided";
+    }
+}
+else
+{
+    throw "No Refresh Token provided";
+}]]></script>
+</dunes-script-module>

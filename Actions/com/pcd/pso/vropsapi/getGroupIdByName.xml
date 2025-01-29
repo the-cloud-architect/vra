@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getGroupIdByName" result-type="string" api-version="6.0.0" id="c5bd084f-8e13-47b0-9735-04dd8a43de14" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vropsapi">
+  <description><![CDATA[get vROPS custom group Id by its name]]></description>
+  <param n="token" t="string"><![CDATA[Auth Token]]></param>
+  <param n="groupName" t="string"><![CDATA[vROPS Group Name]]></param>
+  <param n="vropsRestHost" t="REST:RESTHost"><![CDATA[vROPS URL]]></param>
+  <script encoded="false"><![CDATA[if (!token)         { throw "No Access Token provided"; }
+if (!vropsRestHost) { throw "No vROPS REST host provided"; }
+if (!groupName)     { throw "No Group Name provided"; }
+
+var url = "/suite-api/api/resources/groups";
+var request = vropsRestHost.createRequest("GET", url, "");
+         
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Accept", "application/json");
+request.setHeader("Authorization", "vRealizeOpsToken " + token);
+request.setHeader("X-vRealizeOps-API-use-unsupported", "true");
+
+var requestResponse = request.execute();
+
+jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+System.debug("OUT = " + requestResponse.contentAsString);
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Unable to get list of groups.");
+        throw "Error: " + requestResponse.contentAsString;
+    }
+         
+for (group in jsonResponse["groups"])
+{
+    System.log("Found Group Name " + jsonResponse["groups"][group].resourceKey.name);
+    if ( jsonResponse["groups"][group].resourceKey.name == groupName)
+    {
+        var groupId = jsonResponse["groups"][group].id;
+        System.log("Group Id for Group Name " + groupName + " is " + groupId);
+        return groupId;
+    }
+}
+
+throw "group Id for Group Name " + groupName + " NOT FOUND!";
+
+return null;
+            
+]]></script>
+</dunes-script-module>

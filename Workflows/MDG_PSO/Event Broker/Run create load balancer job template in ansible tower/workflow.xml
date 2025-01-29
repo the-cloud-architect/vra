@@ -1,0 +1,199 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item7" object-name="workflow:name=generic" id="f3f31dcd-10fc-469c-ae98-376d50c7722a" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Run create load balancer job template in ansible tower]]></display-name>
+  <position y="50.0" x="40.0"/>
+  <input>
+    <param name="inputProperties" type="Properties"/>
+    <param name="vm" type="VC:VirtualMachine"/>
+  </input>
+  <attrib name="token" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="username" type="string" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="username">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="password" type="SecureString" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="password"/>
+  <attrib name="domain" type="string" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="domain">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="casRestHost" type="REST:RESTHost" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="casRestHost"/>
+  <attrib name="resourceType" type="string" read-only="false">
+    <value encoded="n"><![CDATA[Cloud.vSphere.Machine]]></value>
+    <description><![CDATA[type of resource to return
+examples: Cloud.NSX.Network
+Cloud.vSphere.Machine]]></description>
+  </attrib>
+  <attrib name="resources" type="Array/Properties" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="jobTemplateId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[9]]></value>
+    <description><![CDATA[Job template id to run in ansible tower]]></description>
+  </attrib>
+  <attrib name="towerPassword" type="string" read-only="false">
+    <value encoded="n"><![CDATA[test]]></value>
+    <description><![CDATA[tower user password]]></description>
+  </attrib>
+  <attrib name="towerRestHost" type="REST:RESTHost" read-only="false">
+    <value encoded="n"><![CDATA[dunes://service.dunes.ch/CustomSDKObject?id='06dc020c-2a70-4024-a54e-2df9e24231bd'&dunesName='REST:RESTHost']]></value>
+    <description><![CDATA[tower URL]]></description>
+  </attrib>
+  <attrib name="towerUsername" type="string" read-only="false">
+    <value encoded="n"><![CDATA[test]]></value>
+  </attrib>
+  <attrib name="towerToken" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="towerInputs" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[{}]]></value>
+  </attrib>
+  <attrib name="vmIpAddreses" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="deploymentId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="920.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task" script-module="com.mdg.pso.casapi/getBearerToken">
+    <display-name><![CDATA[getBearerToken]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.casapi").getBearerToken(username, password, domain, casRestHost);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username"/>
+      <bind name="password" type="SecureString" export-name="password"/>
+      <bind name="domain" type="string" export-name="domain"/>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="195.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="task" script-module="com.mdg.pso.casapi/getDeploymentResourcesByTypeFromDeploymentId">
+    <display-name><![CDATA[getDeploymentResourcesByTypeFromDeploymentId]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.casapi").getDeploymentResourcesByTypeFromDeploymentId(token, casRestHost, deploymentId, type);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Bearer Token]]></description>
+      </bind>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost">
+        <description><![CDATA[vRA Rest Host]]></description>
+      </bind>
+      <bind name="deploymentId" type="string" export-name="deploymentId">
+        <description><![CDATA[deployment Id]]></description>
+      </bind>
+      <bind name="type" type="string" export-name="resourceType">
+        <description><![CDATA[resource type to return]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="Array/Properties" export-name="resources"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="295.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item4" type="task">
+    <display-name><![CDATA[Find VM IPs]]></display-name>
+    <script encoded="false"><![CDATA[var ipAddresses = [];
+for each (var vm in resources) {
+    System.log("Found VM " + vm.properties.resourceName + "with IP address of [" +
+       vm.properties.networks[0].address + "]")
+    ipAddresses.push(vm.properties.networks[0].address);
+}
+
+vmIpAddreses = ipAddresses;]]></script>
+    <in-binding>
+      <bind name="resources" type="Array/Properties" export-name="resources"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vmIpAddreses" type="Array/string" export-name="vmIpAddreses"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="405.0"/>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="task" script-module="com.pcd.pso.towerapi/getOauth2Token">
+    <display-name><![CDATA[get Tower token]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.towerapi").getOauth2Token(username,password,towerRestHost);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="towerUsername">
+        <description><![CDATA[tower user username]]></description>
+      </bind>
+      <bind name="password" type="string" export-name="towerPassword">
+        <description><![CDATA[tower user password]]></description>
+      </bind>
+      <bind name="towerRestHost" type="REST:RESTHost" export-name="towerRestHost">
+        <description><![CDATA[tower URL]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="towerToken"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="510.0"/>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item6" type="task">
+    <display-name><![CDATA[setup tower inputs]]></display-name>
+    <script encoded="false"><![CDATA[var ipObjects =
+{
+  "IP1" : vmIpAddreses[0],
+  "IP2" : vmIpAddreses[1] 
+}
+
+towerInputs = ipObjects;]]></script>
+    <in-binding>
+      <bind name="vmIpAddreses" type="Array/string" export-name="vmIpAddreses"/>
+    </in-binding>
+    <out-binding>
+      <bind name="towerInputs" type="Properties" export-name="towerInputs"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="620.0"/>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item0" type="task" script-module="com.pcd.pso.towerapi/launchJobTemplateById">
+    <display-name><![CDATA[launchJobTemplateById]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.towerapi").launchJobTemplateById(token,towerRestHost,jobTemplateId,inputVars);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="towerToken">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="towerRestHost" type="REST:RESTHost" export-name="towerRestHost">
+        <description><![CDATA[tower URL]]></description>
+      </bind>
+      <bind name="jobTemplateId" type="string" export-name="jobTemplateId">
+        <description><![CDATA[tower job template id]]></description>
+      </bind>
+      <bind name="inputVars" type="Properties" export-name="towerInputs">
+        <description><![CDATA[job template inputs]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="740.0"/>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item1" type="task">
+    <display-name><![CDATA[get deployment Id]]></display-name>
+    <script encoded="false"><![CDATA[deploymentId = inputProperties.deploymentId;]]></script>
+    <in-binding>
+      <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+    </in-binding>
+    <out-binding>
+      <bind name="deploymentId" type="string" export-name="deploymentId"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="100.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

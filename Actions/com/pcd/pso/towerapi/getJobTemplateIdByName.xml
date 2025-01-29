@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getJobTemplateIdByName" result-type="string" api-version="6.0.0" id="6168830d-7696-49c0-8f80-c959a004289c" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.towerapi">
+  <param n="token" t="string"/>
+  <param n="towerRestHost" t="REST:RESTHost"/>
+  <param n="jobTemplateName" t="string"/>
+  <script encoded="false"><![CDATA[if (!token)         { throw "No Access Token provided"; }
+if (!towerRestHost) { throw "No Tower REST host provided"; }
+if (!jobTemplateName) { throw "No Job Template Name provided"; }
+
+var url = "/api/v2/job_templates";
+var request = towerRestHost.createRequest("GET", url, "");
+         
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Accept", "application/json");
+request.setHeader("Authorization", "Bearer " + token);
+
+var requestResponse = request.execute();
+
+jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+System.debug("OUT = " + requestResponse.contentAsString);
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Unable to get job template.");
+        throw "Error: " + requestResponse.contentAsString;
+    }
+
+
+for (jobTemplate in jsonResponse["results"])
+{
+    System.log("Found Job Template Name " + jsonResponse["results"][jobTemplate].name);
+    if ( jsonResponse["results"][jobTemplate].name == jobTemplateName)
+      {
+          return jsonResponse["results"][jobTemplate].id
+      }
+}
+
+return null;
+            
+
+         
+            
+]]></script>
+</dunes-script-module>

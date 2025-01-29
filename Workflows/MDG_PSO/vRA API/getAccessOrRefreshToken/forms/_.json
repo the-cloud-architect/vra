@@ -1,0 +1,1 @@
+{"schema":{"tokenType":{"id":"tokenType","type":{"dataType":"string"},"label":"tokenType","constraints":{"required":false}}},"layout":{"pages":[{"id":"page_07ny1me3","title":"General","sections":[{"id":"section_h0aswykj","fields":[{"id":"tokenType","display":"textField"}]}]}]},"itemId":""}

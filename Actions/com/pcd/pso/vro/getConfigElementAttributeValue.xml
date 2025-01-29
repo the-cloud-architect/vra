@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getConfigElementAttributeValue" result-type="Any" api-version="6.0.0" id="61b66fa4-20b6-4611-807c-242e066cb704" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vro">
+  <description><![CDATA[Returns the configuration element attribute value for the specified configuration element attribute key. Throws exception if not found.
+
+Author: Robert Szymczak (m451@outlook.com)]]></description>
+  <param n="configElementPath" t="string"><![CDATA[Path to the configuration element, e.g.: Library/vCAC]]></param>
+  <param n="configElementName" t="string"><![CDATA[Name of the configuration , e.g.: extensibility]]></param>
+  <param n="attributeKey" t="string"><![CDATA[Name of the attribute to get the value of, e.g.: WFvCOMachineMenuNumber]]></param>
+  <script encoded="false"><![CDATA[if(configElementPath && configElementName && attributeKey)
+{
+	var configpath = Server.getConfigurationElementCategoryWithPath(configElementPath);
+	if(configpath)
+	{
+		var elements = configpath.configurationElements;
+		if(elements && elements.length > 0)
+		{
+			for each (element in elements)
+			{
+				if(element.name == configElementName)
+				{
+					var attributes = element.attributes;
+					if(attributes && attributes.length > 0)
+					{
+						for each(attribute in attributes)
+						{
+							if(attribute.name == attributeKey)
+							{
+								return attribute.value;
+							}
+						}
+					}
+					else
+					{
+						throw("Error: no attributes found for the configuration element provided.");
+					}
+				}
+			}
+		}
+		else
+		{
+			throw("Error: no elements found for the configuration path provided.");
+		}
+	}
+	else
+	{
+		throw("Error: the configuration element path doesn't exist.");
+	}
+}
+else
+{
+	throw("Error: not all required paramerters have been submitted.");
+}
+throw("Error: requested configuration element or attribute not found.");]]></script>
+</dunes-script-module>

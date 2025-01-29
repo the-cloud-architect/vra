@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getBlueprintNameById" result-type="string" api-version="6.0.0" id="96a7731e-446e-49f6-81be-8b05eb915b1c" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <param n="token" t="string"><![CDATA[Bearer Token]]></param>
+  <param n="casRestHost" t="REST:RESTHost"><![CDATA[vRA Rest Host]]></param>
+  <param n="bpId" t="string"><![CDATA[Id of Blueprint to look for]]></param>
+  <script encoded="false"><![CDATA[if (!bpId)        { throw "No Blueprint Id provided!"; }
+if (!token)       { throw "No Bearer Token provided"; }
+if (!casRestHost) { throw "No CAS REST host provided"; }
+        
+var url = "/blueprint/api/blueprints/" + bpId;
+var request = casRestHost.createRequest("GET", url, "");
+         
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Cache-Control", "no-cache");
+request.setHeader("Authorization", "Bearer " + token);
+         
+var requestResponse = request.execute();
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Got Error: " + requestResponse.statusCode);
+        throw "Error: " + JSON.parse(requestResponse.contentAsString);
+    }
+         
+jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+System.log("Found Blueprint name --> " + jsonResponse.name)
+return jsonResponse.name;            
+]]></script>
+</dunes-script-module>

@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getNetworksFromProjectId" result-type="Array/Properties" api-version="6.0.0" id="0ebaff29-ac10-41a4-9594-850240cd67ae" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <param n="projectId" t="string"><![CDATA[e2043d23-8f16-4ae0-b7a0-625f208ba2cd]]></param>
+  <script encoded="false"><![CDATA[//This action returns tags on networks that have the prefix network:xxxxx for a given projectId
+//
+//For this to work, projects must have constraint tags for networks linked network profiles
+//
+//Then for networks part of the network profile, networks must be tagged with network:netname where netname is the name to be returned
+
+if (!projectId)   { throw "No Project Id provided!"; }
+
+var casRestHost = VraHostManager.findHostsByType("vra-onprem")[0];
+System.log("vRA Host " + casRestHost.name + " found successfully!");
+var restClient = casRestHost.createRestClient();
+
+//first step, get network constraints for specified project
+System.log ("Project Id is " + projectId);
+var projectNetworkConstraintTags = [];
+
+var url = '/project-service/api/projects/' + projectId;
+
+var request = restClient.createRequest("GET", url, "");
+request.setHeader("Content-Type","application/json");
+request.setHeader("Accept","application/json");
+ 
+var jsonResponse = restClient.execute(request);
+if(jsonResponse.statusCode != 200)
+    {
+        System.log("Error getting Project Info for project " + projectId);
+        throw "Error: " +  jsonResponse.contentAsString;
+    }
+
+var tagKey="";
+var tagValue="";
+
+System.log("Results are --> " + jsonResponse.contentAsString);
+
+projectInfoJson = JSON.parse(jsonResponse.contentAsString);
+networkProfileConstraintTags = projectInfoJson.constraints.network.conditions;
+for each (var item in projectInfoJson.constraints.network.conditions){
+   if (item.type == "TAG"){
+        System.log(item.expression.key + ':' + item.expression.value)
+        var tagKey=item.expression.key;
+        var tagValue=item.expression.value;
+        projectNetworkConstraintTags.push(item.expression.key + ':' + item.expression.value)
+	    }
+    }
+System.log(projectNetworkConstraintTags);
+
+
+// now we need to fetch all network profiles and match them with constraint tags from project
+var url = '/iaas/api/network-profiles';
+
+var request = restClient.createRequest("GET", url, "");
+request.setHeader("Content-Type","application/json");
+request.setHeader("Accept","application/json");
+ 
+var jsonResponse = restClient.execute(request);
+if(jsonResponse.statusCode != 200)
+    {
+        System.log("Error getting Network Profiles");
+        throw "Error: " +  jsonResponse.contentAsString;
+    }
+
+System.log("Results are --> " + jsonResponse.contentAsString);
+networkProfileJson = JSON.parse(jsonResponse.contentAsString);
+
+var networkLinks = []; //holds all network links that match network constraints of project
+
+for each (var item in networkProfileJson.content) { //loop thru each network profile
+    System.log("Checking network profile [" + item.name + "]")
+    for each (var tag in item.tags) { //then lookup each tag assigned to that network profile
+        System.log("    Checking network profile tag for a match[" + tag.key+":"+tag.value + "]")
+        //now, if one of these tags match one in the project network constraint tags, save its associated network
+        for each (var pnct in projectNetworkConstraintTags) { //loop thru the project constraint tags
+               System.log("          Checking project network constraint tag for a match [" + pnct + "]")
+               if (tag.key+":"+tag.value == pnct) {
+                   System.log("found network " + pnct + " with link " + item["_links"]["fabric-networks"]["hrefs"])
+                   for each (var link in item["_links"]["fabric-networks"]["hrefs"]) {
+                      System.log("Puhsing found link " + link)
+                      networkLinks.push(link)
+                   }
+                }
+            }
+
+        }
+     
+    }
+
+var projectNetworks = [];
+
+//now for each network link (which is a valid net for this project) return the name and tag named network:xxxx
+    for each (var networkLink in networkLinks) {
+        var url = networkLink;
+
+        var request = restClient.createRequest("GET", url, "");
+        request.setHeader("Content-Type","application/json");
+        request.setHeader("Accept","application/json");
+        
+        var jsonResponse = restClient.execute(request);
+        if(jsonResponse.statusCode != 200)
+            {
+                System.log("Error getting Network Link [" + networkLink + "]");
+                                System.log("Request info " + request.fullUrl);
+
+                throw "Error: " +  jsonResponse.contentAsString;
+            }
+
+        System.log("Results are --> " + jsonResponse.contentAsString);
+        networkLinkJson = JSON.parse(jsonResponse.contentAsString);
+
+        for each (tag in networkLinkJson.tags) {
+            if (tag.key == "network") {
+                projectNetworks.push(new Properties({ label: networkLinkJson.name, value: tag.key + ":" + tag.value }));
+            }
+        }
+    }
+System.log(projectNetworks);
+return projectNetworks;]]></script>
+</dunes-script-module>

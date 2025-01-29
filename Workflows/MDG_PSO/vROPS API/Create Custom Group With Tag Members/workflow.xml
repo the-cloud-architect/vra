@@ -1,0 +1,191 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="8c00d546-3b13-41e7-8d25-6fbfe9847370" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create Custom Group With Tag Members]]></display-name>
+  <description><![CDATA[Gets a vROPS access token. ]]></description>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="tagCategory" type="string"/>
+    <param name="tagName" type="string"/>
+    <param name="groupName" type="string"/>
+    <param name="policyName" type="string">
+      <description><![CDATA[Policy Name to apply to the created group. If empty will skip assigning policy.]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="groupId_out" type="string"/>
+  </output>
+  <attrib name="vropsRestHost" type="REST:RESTHost" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="vropsRestHost"/>
+  <attrib name="username" type="string" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="username">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="password" type="SecureString" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="password"/>
+  <attrib name="authSource" type="string" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="authSource">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="token" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="policyId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[hold the policy Id if a policy name was supplied]]></description>
+  </attrib>
+  <attrib name="groupId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[contains the group Id of the created group]]></description>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="940.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item8" type="task" script-module="com.pcd.pso.vropsapi/getAccessToken">
+    <display-name><![CDATA[getAccessToken]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.vropsapi").getAccessToken(username,password,vropsRestHost,authSource);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username">
+        <description><![CDATA[vROPS user username]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[vROPS user password]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+      <bind name="authSource" type="string" export-name="authSource">
+        <description><![CDATA[vROPS Auth Source]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item10" type="task" script-module="com.pcd.pso.vropsapi/createCustomGroupWithTagMembers">
+    <display-name><![CDATA[create group]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.vropsapi").createCustomGroupWithTagMembers(token,vropsRestHost,groupName,tagCategory,tagName);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+      <bind name="groupName" type="string" export-name="groupName">
+        <description><![CDATA[custom group name to create]]></description>
+      </bind>
+      <bind name="tagCategory" type="string" export-name="tagCategory">
+        <description><![CDATA[tag category members]]></description>
+      </bind>
+      <bind name="tagName" type="string" export-name="tagName">
+        <description><![CDATA[tag name members]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="groupId"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="30.0" x="540.0"/>
+  </workflow-item>
+  <workflow-item name="item8" out-name="item9" type="custom-condition" alt-out-name="item11">
+    <display-name><![CDATA[policy name provided?]]></display-name>
+    <script encoded="false"><![CDATA[if (policyName.length > 0) { return true; } else { return false; }]]></script>
+    <in-binding>
+      <bind name="policyName" type="string" export-name="policyName"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Custom decision based on a custom script.]]></description>
+    <position y="50.0" x="280.0"/>
+  </workflow-item>
+  <workflow-item name="item9" out-name="item2" type="task" script-module="com.pcd.pso.vropsapi/getPolicyByName">
+    <display-name><![CDATA[get policy Id]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.vropsapi").getPolicyByName(token,policyName,vropsRestHost);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="policyName" type="string" export-name="policyName">
+        <description><![CDATA[vROPS Policy Name]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="policyId"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="30.0" x="420.0"/>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item12" type="task" script-module="com.pcd.pso.vropsapi/applyPolicyToResource">
+    <display-name><![CDATA[apply policy to group]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.vropsapi").applyPolicyToResource(token,policyId,vropsRestHost,resourceId);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="policyId" type="string" export-name="policyId">
+        <description><![CDATA[vROPS Policy Id to apply]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+      <bind name="resourceId" type="string" export-name="groupId">
+        <description><![CDATA[resource ID to apply policy to]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name=""/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="30.0" x="660.0"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item12" type="task" script-module="com.pcd.pso.vropsapi/createCustomGroupWithTagMembers">
+    <display-name><![CDATA[create group]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.vropsapi").createCustomGroupWithTagMembers(token,vropsRestHost,groupName,tagCategory,tagName);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+      <bind name="groupName" type="string" export-name="groupName">
+        <description><![CDATA[custom group name to create]]></description>
+      </bind>
+      <bind name="tagCategory" type="string" export-name="tagCategory">
+        <description><![CDATA[tag category members]]></description>
+      </bind>
+      <bind name="tagName" type="string" export-name="tagName">
+        <description><![CDATA[tag name members]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="groupId"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="80.0" x="540.0"/>
+  </workflow-item>
+  <workflow-item name="item12" out-name="item0" type="task">
+    <display-name><![CDATA[output group Id]]></display-name>
+    <script encoded="false"><![CDATA[groupId_out = groupId;]]></script>
+    <in-binding>
+      <bind name="groupId" type="string" export-name="groupId"/>
+    </in-binding>
+    <out-binding>
+      <bind name="groupId_out" type="string" export-name="groupId_out"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="800.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

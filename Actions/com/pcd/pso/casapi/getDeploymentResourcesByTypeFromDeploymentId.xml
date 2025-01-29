@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getDeploymentResourcesByTypeFromDeploymentId" result-type="Array/Properties" api-version="6.0.0" id="ff5f40ad-2cc9-4f26-a4b2-6b2654278376" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <description><![CDATA[Gets the name of a deployment from the deployment ID]]></description>
+  <param n="token" t="string"><![CDATA[Bearer Token]]></param>
+  <param n="casRestHost" t="REST:RESTHost"><![CDATA[vRA Rest Host]]></param>
+  <param n="deploymentId" t="string"><![CDATA[deployment Id]]></param>
+  <param n="type" t="string"><![CDATA[resource type to return]]></param>
+  <script encoded="false"><![CDATA[if (!deploymentId)      { throw "No deployment Id provided!"; }
+if (!token)       { throw "No Bearer Token provided"; }
+if (!casRestHost) { throw "No CAS REST host provided"; }
+if (!type) { System.log("No type provided, assuming all resource types.") }
+
+var url = "/deployment/api/deployments/"+deploymentId+"/resources?size=200";
+var request = casRestHost.createRequest("GET", url, "");
+         
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Cache-Control", "no-cache");
+request.setHeader("Authorization", "Bearer " + token);
+        
+var requestResponse = request.execute();
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Error getting deployment resources information for Id " + deploymentId);
+        throw "Error: " +  requestResponse.contentAsString;
+    }
+         
+    jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+    //System.log("Deployment resource are " + JSON.stringify(jsonResponse.content));
+
+var resources = [];
+
+	for each (var resource in jsonResponse.content) {
+       if (resource.type == type || !type) { //Only look for resources of specific type or ALL if no type provided
+           System.log("Found resource name " + resource.name)
+           resources.push(resource)           
+       }
+    }
+
+return resources;
+]]></script>
+</dunes-script-module>

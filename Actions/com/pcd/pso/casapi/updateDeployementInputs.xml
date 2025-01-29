@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="updateDeployementInputs" result-type="string" api-version="6.0.0" id="1bac3e12-114e-4ddc-af28-4684791f53b9" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <description><![CDATA[executes a Deployment Update action on the specified deployement ID passing a JSON of inputs]]></description>
+  <param n="token" t="string"><![CDATA[Bearer Token]]></param>
+  <param n="casRestHost" t="REST:RESTHost"><![CDATA[vRA Rest Host]]></param>
+  <param n="deploymentId" t="string"><![CDATA[deployment to update]]></param>
+  <param n="inputs" t="Properties"><![CDATA[Input properties to update]]></param>
+  <script encoded="false"><![CDATA[if (!inputs)      { throw "No input properties provided!"; }
+if (!token)       { throw "No Bearer Token provided"; }
+if (!casRestHost) { throw "No CAS REST host provided"; }
+if (!deploymentId) { throw "No Deployment ID provided"; }
+
+        var url = "/deployment/api/deployments/"+deploymentId+"/requests";
+
+        var requestContent = new Properties()
+            requestContent.actionId = "Deployment.Update";
+            requestContent.reason = "Inputs Update";
+            requestContent.inputs = inputs;
+
+        System.log("requestContent is :" + JSON.stringify(requestContent));
+
+        var request = casRestHost.createRequest("POST", url, JSON.stringify(requestContent));
+        
+        request.setHeader("Content-Type", "application/json");
+        request.setHeader("Cache-Control", "no-cache");
+        request.setHeader("Authorization", "Bearer " + token);
+         
+        var requestResponse = request.execute();
+
+        jsonResponse = JSON.parse(requestResponse.contentAsString);
+ 
+        if(requestResponse.statusCode != 200)
+        {
+            System.log("Request has returned an error status code: " + requestResponse.statusCode);
+            System.log("Response String: " + requestResponse.contentAsString);
+            throw "Error: " + requestResponse.contentAsString;
+        }]]></script>
+</dunes-script-module>

@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getAccessOrRefreshToken" result-type="string" api-version="6.0.0" id="30cf2cee-cca9-43aa-9a58-ff836af1a6b0" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <description><![CDATA[Get CAS access or refresh token and store in  configuration element]]></description>
+  <param n="username" t="string"><![CDATA[CAS user username]]></param>
+  <param n="password" t="Any"><![CDATA[CAS user password]]></param>
+  <param n="casRestHost" t="REST:RESTHost"><![CDATA[CAS URL]]></param>
+  <param n="domain" t="string"><![CDATA[CAS user domain]]></param>
+  <param n="tokenType" t="string"/>
+  <script encoded="false"><![CDATA[if((username) && (password))
+{
+    if(domain) 
+    {
+        System.log("Using user domain " + domain)
+    }
+    else
+    {
+        System.log("No user domain provided, assuming local domain.");
+        domain="";
+    }
+
+    if(tokenType)
+    {
+        System.log("Token type requested is " + tokenType)
+    }
+    else
+    {
+        throw "Token type (access or refresh) must be provided.";
+    }
+
+    if(casRestHost)
+    {
+        try
+        {
+            var url = "/csp/gateway/am/api/login?access_token";
+            var requestContent = '{ "username": "' + username + '", "password": "' + password + '", "domain": "' + domain + '"}';
+            var request = casRestHost.createRequest("POST", url, requestContent);
+         
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Cache-Control", "no-cache");
+         
+            var requestResponse = request.execute();
+
+            jsonResponse = JSON.parse(requestResponse.contentAsString);
+ 
+            if(requestResponse.statusCode != 200)
+            {
+                System.log("Token request has returned an error status code: " + requestResponse.statusCode);
+                throw "Error: " + requestResponse.statusCode + " " + jsonResponse.serverMessage;
+            }
+         
+            if (tokenType == "access")
+            {
+                var accessToken = jsonResponse.access_token;
+                System.log("access Token: " + accessToken);
+                return accessToken;
+            }
+            if (tokenType == "refresh")
+            {
+                var refreshToken = jsonResponse.refresh_token;
+                System.log("refresh Token: " + refreshToken);        
+                return refreshToken;
+            }
+        }
+        catch(e)
+        {
+            System.log(e);
+            throw e;
+        }
+    }
+    else
+    {
+        throw "No CAS REST host provided";
+    }
+}
+else
+{
+    throw "No API credentials provided";
+}]]></script>
+</dunes-script-module>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="ab85a725-4473-437a-a684-2565ef37df34" editor-version="2.0" version="0.0.0" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>new Computer Account - WM</display-name>
+    <position y="50.0" x="100.0"/>
+    <input/>
+    <output/>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="520.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item2" type="task" comparator="0">
+        <display-name>get Payload</display-name>
+        <script encoded="false"></script>
+        <in-binding/>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="170.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item0" type="link" linked-workflow-id="958080808080808080808080808080804C81808001175609873343b6bbd2e3eea" comparator="0">
+        <display-name>Create a computer in an organizational unit</display-name>
+        <script encoded="false"></script>
+        <in-binding>
+            <bind name="ou" type="AD:OrganizationalUnit" export-name="">
+                <description>Parent organizational unit for the new computer</description>
+            </bind>
+            <bind name="computerName" type="string" export-name="">
+                <description>Name for the new computer</description>
+            </bind>
+            <bind name="domainName" type="string" export-name="">
+                <description>Domain name in form: company.sample (optional)</description>
+            </bind>
+        </in-binding>
+        <out-binding>
+            <bind name="newComputer" type="AD:ComputerAD" export-name=""/>
+        </out-binding>
+        <description> </description>
+        <position y="60.0" x="260.0"/>
+    </workflow-item>
+</ns2:workflow>

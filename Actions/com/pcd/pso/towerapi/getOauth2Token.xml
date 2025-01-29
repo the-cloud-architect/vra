@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getOauth2Token" result-type="string" api-version="6.0.0" id="a548422f-aa57-4b72-bb10-d0842adf4fd2" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.towerapi">
+  <description><![CDATA[Get CAS access or refresh token and store in  configuration element]]></description>
+  <param n="username" t="string"><![CDATA[tower user username]]></param>
+  <param n="password" t="string"><![CDATA[tower user password]]></param>
+  <param n="towerRestHost" t="REST:RESTHost"><![CDATA[tower URL]]></param>
+  <script encoded="false"><![CDATA[if((username) && (password))
+{
+    if(towerRestHost)
+    {
+     try
+        {
+            var url = "/api/v2/tokens/";
+            var request = towerRestHost.createRequest("POST", url, "");
+         
+            var creds = System.getModule("com.pcd.pso.towerapi").encodeBase64(username+":"+password);
+
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Authorization", "Basic " + creds);
+         
+            var requestResponse = request.execute();
+
+            jsonResponse = JSON.parse(requestResponse.contentAsString);
+ 
+            if(requestResponse.statusCode != 201)
+            {
+                System.log("Token request has returned an error status code: " + requestResponse.statusCode);
+                throw "Error: " + requestResponse.statusCode + " " + jsonResponse.serverMessage;
+            }
+         
+            System.log("jsonResponse = " + jsonResponse);
+
+            var token = jsonResponse.token;
+            System.log("token: " + token);   
+            return token;
+        }
+        catch(e)
+        {
+            System.log(e);
+            throw e;
+        }
+    }
+    else
+    {
+        throw "No Tower REST host provided";
+    }
+}
+else
+{
+    throw "No API credentials provided";
+}]]></script>
+</dunes-script-module>

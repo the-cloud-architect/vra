@@ -1,0 +1,1 @@
+{"schema":{"bpId":{"id":"bpId","type":{"dataType":"string"},"label":"bpId"}},"layout":{"pages":[{"id":"page_jnb8hilm","title":"General","sections":[{"id":"section_lq8w730i","fields":[{"id":"bpId","display":"textField","state":{"visible":true,"read-only":false}}]}]}]},"itemId":""}

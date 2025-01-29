@@ -1,0 +1,1 @@
+{"schema":{"hostname":{"id":"hostname","type":{"dataType":"string"},"label":"hostname","constraints":{"required":false}}},"layout":{"pages":[{"id":"page_rp6t7d4s","title":"General","sections":[{"id":"section_vest3gea","fields":[{"id":"hostname","display":"textField","signpostPosition":"right-middle","state":{"visible":true,"read-only":false}}]}]}]},"itemId":""}

@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getRestHostByName" result-type="REST:RESTHost" api-version="6.0.0" id="7b6ca40e-cb9d-476e-9b2d-85d3ee7bf3ca" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vro">
+  <param n="hostname" t="string"/>
+  <script encoded="false"><![CDATA[if (!hostname) { throw "Hostname must be provided"; }
+var hosts = RESTHostManager.getHosts()
+for (host in hosts) {
+   System.log("Found host ID : " + hosts[host] + " , looking it up...")
+   var restHost = RESTHostManager.getHost(hosts[host]);
+   System.log("    Found REST host with name : " + restHost.name + ", looking for a match...")
+   if (hostname == restHost.name) {
+       System.log("      Found match : " + restHost.name + ", returning REST host object.");
+       return restHost;
+    }
+ }
+System.log("      No match found for : " + hostname + ", returning NULL.");
+return null;
+]]></script>
+</dunes-script-module>

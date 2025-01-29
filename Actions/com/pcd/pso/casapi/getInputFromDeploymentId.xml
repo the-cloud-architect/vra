@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getInputFromDeploymentId" result-type="Any" api-version="6.0.0" id="1f46f04e-ea53-4b0a-9197-937285ecb372" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <description><![CDATA[Gets the inputs passed to a specific deployment ID]]></description>
+  <param n="token" t="string"><![CDATA[Bearer Token]]></param>
+  <param n="casRestHost" t="REST:RESTHost"><![CDATA[vRA Rest Host]]></param>
+  <param n="deploymentId" t="string"><![CDATA[deployment Id]]></param>
+  <param n="input" t="string"><![CDATA[input value to return]]></param>
+  <script encoded="false"><![CDATA[if (!deploymentId)      { throw "No deployment Id provided!"; }
+if (!token)       { throw "No Bearer Token provided"; }
+if (!casRestHost) { throw "No CAS REST host provided"; }
+        
+var url = "/deployment/api/deployments/"+deploymentId;
+var request = casRestHost.createRequest("GET", url, "");
+         
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Cache-Control", "no-cache");
+request.setHeader("Authorization", "Bearer " + token);
+        
+var requestResponse = request.execute();
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Error getting deployment Id information for Id " + deploymentId);
+        throw "Error: " +  requestResponse.contentAsString;
+    }
+         
+    jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+    if (!jsonResponse.inputs)
+    {
+        throw "No inputs found for deploymentId " + deploymentId;
+    }
+
+    //System.log("Inputs are --> " + JSON.stringify(jsonResponse.inputs));
+
+    System.log("Requested input [" + input + "] value is " + JSON.stringify(jsonResponse.inputs[input]) );
+
+    return JSON.stringify(jsonResponse.inputs[input]);
+]]></script>
+</dunes-script-module>

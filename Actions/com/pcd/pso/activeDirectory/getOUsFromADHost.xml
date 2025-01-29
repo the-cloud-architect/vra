@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getOUsFromADHost" result-type="Array/Properties" api-version="6.0.0" id="00d511c6-8298-4600-9584-5196ee50ef9e" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.activeDirectory">
+  <param n="filter" t="string"><![CDATA[filter to be added to ldap query]]></param>
+  <param n="baseDN" t="string"><![CDATA[baseDN to search from (optional)]]></param>
+  <param n="removeDC" t="boolean"><![CDATA[if input is provided, will remove DC components]]></param>
+  <script encoded="false"><![CDATA[
+// Configure attributes that need returned from AD
+var ATTRIBS = ['distinguishedName', 'canonicalName'];
+
+// Get AD Host object from AD plugin library
+var adHost = System.getModule("com.pcd.pso.activeDirectory").getAdHostByHostname("dc1.convergelabs.ca")
+//var adHost = AD_HostManager.findHost("e125853d-da96-4f09-8fe2-d78682087de5");
+
+// Search base/root OU where server computer objects are
+if (baseDN) { var ldapDn = baseDN; } else { var ldapDn = adHost.hostConfiguration.ldapBase; }
+System.log("Base DN search for this AD host is: " + ldapDn)
+
+if (filter) { var ldapFilter = filter; } else { var ldapFilter = "*"; }
+System.log("search filter is : " + ldapFilter)
+
+// Connect and query AD for OUs under base OU
+var ldapClient = adHost.getLdapClient();
+var searchResults = ldapClient.search(ldapDn, LdapSearchScope.SUB, LdapDereferencePolicy.NEVER, 99999, 0, "&(objectClass=OrganizationalUnit)(name="+ldapFilter+")", ATTRIBS);
+var entries = searchResults.getSearchEntries();
+var adOUs = new Array();
+
+// Define a comparator function that compares the 'name' attribute of each entry
+function compareEntries(a, b) {
+  var nameA = a.getAttributeValues("canonicalName")[0];
+  var nameB = b.getAttributeValues("canonicalName")[0];
+  return nameA.localeCompare(nameB);
+}
+ 
+// Sort the entries array using the comparator function
+entries.sort(compareEntries);
+
+// Loop through the entries and append the sub-organizational unit path to each name
+for each (var entry in entries) {
+    //if ignoreDC input parameter present, strip DC components
+    if (removeDC) {
+        var relativeDistinguishedName = removeDCComponents(entry.getAttributeValues("distinguishedName")[0]); 
+    }
+    //else return full DN
+    else {
+        var relativeDistinguishedName = entry.getAttributeValues("distinguishedName")[0]; 
+    }
+    var name = entry.getAttributeValues("canonicalName")[0];
+ 
+    // Remove "domain name" from the name
+    firstParentIndex = name.indexOf("/")
+    name = name.substring(firstParentIndex, name.length)
+    
+    // Log output for debugging
+    System.log(name);
+    System.log("    DN-> " + relativeDistinguishedName);
+    // Add the name and distinguishedName pair to the adOUs array
+    adOUs.push(new Properties({value: relativeDistinguishedName, label: name}));
+}
+
+ 
+return adOUs;
+
+// Function to remove all DC components from a Distinguished Name (DN)
+function removeDCComponents(inputString) {
+    // Split the input string by comma to get individual components
+    var components = inputString.split(',');
+
+    // Filter out the components that start with "DC="
+    var filteredComponents = components.filter(function(component) {
+        // Trim any leading/trailing spaces and check if the component starts with "DC="
+        return component.trim().indexOf("DC=") !== 0;
+    });
+
+    // Join the remaining components back together with comma
+    return filteredComponents.join(',');
+}]]></script>
+</dunes-script-module>

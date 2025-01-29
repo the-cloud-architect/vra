@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getAccessToken" result-type="string" api-version="6.0.0" id="40bfcebf-de78-4094-9231-387d91dd3fc3" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vropsapi">
+  <description><![CDATA[Get vROPS access token]]></description>
+  <param n="username" t="string"><![CDATA[vROPS user username]]></param>
+  <param n="password" t="Any"><![CDATA[vROPS user password]]></param>
+  <param n="vropsRestHost" t="REST:RESTHost"><![CDATA[vROPS URL]]></param>
+  <param n="authSource" t="string"><![CDATA[vROPS Auth Source]]></param>
+  <script encoded="false"><![CDATA[if((username) && (password))
+{
+
+    if(authSource) 
+    {
+        System.log("Using Auth Source " + authSource)
+        var requestContent = '{ "username": "' + username + '", "password": "' + password + '", "authSource": "' + authSource + '"}';
+    }
+    else
+    {
+        System.log("No Auth Source provided, assuming local domain.");
+        var requestContent = '{ "username": "' + username + '", "password": "' + password + '" }';
+    }
+
+    System.log("requestContent = " + JSON.stringify(requestContent) );
+
+    if(vropsRestHost)
+    {
+            var url = "/suite-api/api/auth/token/acquire";
+            var request = vropsRestHost.createRequest("POST", url, requestContent );
+         
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Accept", "application/json");
+
+            var requestResponse = request.execute();
+
+            jsonResponse = JSON.parse(requestResponse.contentAsString);
+ 
+            if(requestResponse.statusCode != 200)
+            {
+                System.log("Token request has returned an error status code: " + requestResponse.statusCode);
+                throw "Error: " + requestResponse.contentAsString;
+            }
+         
+            var accessToken = jsonResponse.token;
+            System.log("access Token: " + accessToken);
+            return accessToken;
+            
+    }
+    else
+    {
+        throw "No vROPS REST host provided";
+    }
+}
+else
+{
+    throw "No API credentials provided";
+}]]></script>
+</dunes-script-module>

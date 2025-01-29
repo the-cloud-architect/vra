@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="13187b6a-0f04-4b08-9509-d1d1aaeb663f" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[getDeploymentIdFromVCVM]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="vm" type="VC:VirtualMachine"/>
+  </input>
+  <output>
+    <param name="deploymentId" type="string"/>
+  </output>
+  <attrib name="token" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="casRestHost" type="REST:RESTHost" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="casRestHost"/>
+  <attrib name="password" type="SecureString" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="password"/>
+  <attrib name="username" type="string" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="username">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="domain" type="string" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="domain">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="vmName" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="503.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item3" type="task" script-module="com.pcd.pso.casapi/getBearerToken">
+    <display-name><![CDATA[get token]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.casapi").getBearerToken(username,password,domain,casRestHost);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username"/>
+      <bind name="password" type="SecureString" export-name="password"/>
+      <bind name="domain" type="string" export-name="domain"/>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="140.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task" script-module="com.pcd.pso.casapi/getDeploymentIdFromVmName">
+    <display-name><![CDATA[get deployment id]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.casapi").getDeploymentIdFromVmName(token,casRestHost,vmName);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Bearer Token]]></description>
+      </bind>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost">
+        <description><![CDATA[vRA Rest Host]]></description>
+      </bind>
+      <bind name="vmName" type="string" export-name="vmName">
+        <description><![CDATA[name of VM to look for]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="deploymentId"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="355.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item2" type="task">
+    <display-name><![CDATA[get vm name]]></display-name>
+    <script encoded="false"><![CDATA[vmName = vm.name]]></script>
+    <in-binding>
+      <bind name="vm" type="VC:VirtualMachine" export-name="vm"/>
+    </in-binding>
+    <out-binding>
+      <bind name="vmName" type="string" export-name="vmName"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="246.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

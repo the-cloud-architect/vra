@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getConnectionBasedOnSiteAndType" result-type="CS:CohesityConnection" api-version="6.0.0" id="8ac2ddb7-b311-44eb-9f55-efc891c86ee6" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.cohesity">
+  <description><![CDATA[Gets Cohesity endpoint based on site location and cluster type ]]></description>
+  <param n="site" t="string"><![CDATA[Site to lookup connection for (mtl/tor)]]></param>
+  <param n="cType" t="string"><![CDATA[Type of cluster to search (sgbd/file)]]></param>
+  <script encoded="false"><![CDATA[switch(cType) {
+    case 'sgbd':
+        switch(site) {
+            case 'mtl':
+                connection = System.getModule("com.pcd.pso.vro").getConfigElementAttributeValue('Cohesity','Desjardins Backup Automation','defaultConnectionMtlSql');
+                System.log("Returning connection MTL + SGBD");
+                return connection;;
+            case 'tor':
+                connection = System.getModule("com.pcd.pso.vro").getConfigElementAttributeValue('Cohesity','Desjardins Backup Automation','defaultConnectionTorSql');
+                System.log("Returning connection TOR + SGBD");
+                return connection;;
+            default:
+                throw "Unknown Site name " + site + ". Aborting."
+    }   
+    case 'file':
+        switch(site) {
+            case 'mtl':
+                connection = System.getModule("com.pcd.pso.vro").getConfigElementAttributeValue('Cohesity','Desjardins Backup Automation','defaultConnectionMtlFiles');
+                System.log("Returning connection MTL + FILE");
+                return connection;;
+            case 'tor':
+                connection = System.getModule("com.pcd.pso.vro").getConfigElementAttributeValue('Cohesity','Desjardins Backup Automation','defaultConnectionTorFiles');
+                System.log("Returning connection TOR + FILE");
+                return connection;
+            default:
+                throw "Unknown Site name " + site + ". Aborting."
+    }   
+    default:
+        throw "Unknown connection type name " + cType + ". Aborting."
+}
+
+
+]]></script>
+</dunes-script-module>

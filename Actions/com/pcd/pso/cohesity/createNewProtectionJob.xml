@@ -1,0 +1,285 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createNewProtectionJob" result-type="void" api-version="6.0.0" id="91852084-9b56-48ef-a82c-367c55364a14" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.cohesity">
+  <description><![CDATA[Creates a new Physical/VM protection job.]]></description>
+  <param n="connection" t="CS:CohesityConnection"><![CDATA[Cohesity Endpoint]]></param>
+  <param n="protectionPolicy" t="CS:ProtectionPolicy"><![CDATA[Protection Policy]]></param>
+  <param n="viewBox" t="CS:ViewBox"><![CDATA[View Box/Storage Domain]]></param>
+  <param n="name" t="string"><![CDATA[Protection Job Name]]></param>
+  <param n="description" t="string"><![CDATA[Protection Job Description]]></param>
+  <param n="physicalMachine" t="CS:PhysicalMachine"><![CDATA[The physical machine to be protected]]></param>
+  <param n="virtualMachine" t="Array/CS:VirtualMachine"><![CDATA[The VM to be protected]]></param>
+  <param n="parentSourceId" t="number"><![CDATA[The parent source id for VM/Physical machine]]></param>
+  <param n="qosType" t="string"><![CDATA[BackupHDD/BackupSSD]]></param>
+  <param n="priority" t="string"><![CDATA[low/medium/high]]></param>
+  <param n="quiesce" t="boolean"><![CDATA[Indicates if the App-Consistent option is enabled for this Job.]]></param>
+  <param n="startTime_hour" t="number"/>
+  <param n="startTime_minute" t="number"/>
+  <param n="timezone" t="string"><![CDATA[Default UTC]]></param>
+  <param n="fullProtectionSlaTimeMins" t="number"><![CDATA[If specified, this setting is number of minutes that a Job Run of a Full (no CBT) backup schedule is expected to complete, which is known as a Service-Level Agreement (SLA).]]></param>
+  <param n="incrementalProtectionSlaTimeMins" t="number"><![CDATA[If specified, this setting is number of minutes that a Job Run of a CBT-based backup schedule is expected to complete, which is known as a Service-Level Agreement (SLA). ]]></param>
+  <param n="enableIndexing" t="boolean"><![CDATA[Is indexing enabled?]]></param>
+  <param n="indexAllowPrefixes" t="Array/string"><![CDATA[Array of Indexed Directories.]]></param>
+  <param n="indexDenyPrefixes" t="Array/string"><![CDATA[Array of Excluded Directories.]]></param>
+  <param n="performSourceSideDedup" t="boolean"/>
+  <param n="alertingPolicy" t="Array/string"><![CDATA[Success/Failure/Sla Violation]]></param>
+  <param n="alertEmails" t="Array/string"><![CDATA[Receipient addresses]]></param>
+  <param n="includedPaths" t="Array/string"><![CDATA[File Based Protection (Included Paths)]]></param>
+  <param n="excludedPaths" t="Array/string"><![CDATA[File Based Protection (Excluded Paths)]]></param>
+  <param n="protectionType" t="string"><![CDATA[File Based/Block Based]]></param>
+  <param n="vmTags" t="Array/CS:Node"><![CDATA[VMware Tags]]></param>
+  <param n="sqlDbs" t="Array/CS:Node"><![CDATA[All the SQL Dbs]]></param>
+  <param n="sqlInstance" t="CS:SourceRootNode"><![CDATA[SQL Source Nodes]]></param>
+  <param n="sqlBackupType" t="string"><![CDATA["File Based"/"Volume Based"]]></param>
+  <script encoded="false"><![CDATA[function prefixKConstant(inputStr) {
+	var fStr = 'k';
+	var words = inputStr.trim().split(" ");
+	for(var i = 0 ; i < words.length ; i++ ) {
+		if (words[i] == "") {
+			continue;
+		}
+		fStr = fStr + words[i].charAt(0).toUpperCase() + words[i].slice(1);
+	}
+	return fStr;
+}
+
+var filePaths = null;
+function filterExcludedPaths(iPath) {
+	var nExcludedPaths = new Array();
+	var gPaths = new Array();
+	if (!iPath) {
+		throw "Invalid protection path specified.";
+	}	
+	for(var i = 0; i < excludedPaths.length; i++ ) {
+		if (excludedPaths[i].indexOf(iPath) == -1) {
+			nExcludedPaths.push(excludedPaths[i]);
+			continue;
+		} else if (excludedPaths[i].indexOf(iPath) == 0) {
+			gPaths.push(excludedPaths[i]);
+		}
+	}
+	
+	excludedPaths = nExcludedPaths;
+	return gPaths;
+}
+
+function escapeToWindowType(wPaths) {
+	var escaped = new Array();
+	for(var i = 0 ; i < wPaths.length ; i++ ) {
+		var str = wPaths[i].replace(/\\/g,'\/').replace(':','');
+		if (str.charAt(0) != '\/') {
+			str = '\/' + str;
+		}
+		escaped.push(str);
+	}
+	return escaped;
+}
+
+
+if (!connection) {
+    throw "[Invalid Input] Cohesity connection is required."
+}
+
+if (!physicalMachine && !virtualMachine && !sqlDbs) {
+    throw "[Invalid Input] A physical/ virtual machine/ SQL source must be associated with a protection job.";
+}
+
+if (!viewBox) {
+    throw "[Invalid Input] View box/storage domain instance is required."
+}
+
+if (!protectionPolicy) {
+    throw "[Invalid Input] Protection policy is required."
+}
+
+var policyId = protectionPolicy.id;
+
+// Setting the environment
+var environment = null;
+if (physicalMachine) {
+    environment = protectionType == 'File Based' ? 'kPhysicalFiles' : 'kPhysical';
+} else if (sqlInstance && sqlDbs.length > 0){
+    environment = "kSQL";
+} else {
+    environment = 'kVMware';
+}
+	
+// Validate and set the timezone
+if (timezone) {
+	var tzone = timezone.split("(");
+	if (tzone.length != 2) {
+		throw "[Invalid Input] Invalid timezone specified.";
+	}
+	timezone = tzone[0].trim();
+} else {
+	timezone = "UTC";
+}
+
+var timezone = timezone ? timezone : 'UTC' // Defaults to UTC
+var fullProtectionSlaTimeMins = fullProtectionSlaTimeMins ? fullProtectionSlaTimeMins : 120; // Default to 120
+var incrementalProtectionSlaTimeMins = incrementalProtectionSlaTimeMins ? incrementalProtectionSlaTimeMins : 60; // Default to 60
+
+
+var physicalSpecialParam = null;
+var sourceSpecialParam = null;
+if (protectionType == "File Based") {
+    physicalSpecialParam = new CSPhysicalSpecialParameters();
+    sourceSpecialParam = new CSSourceSpecialParameters();
+
+	System.log("The input paths " + includedPaths);
+	if (!includedPaths || includedPaths.length == 0) {
+		throw "[Invalid Input] Protection path not specified."
+	}
+	if (!excludedPaths) {
+		excludedPaths = [];
+	}
+	filePaths = new Array();
+	for(var i = 0 ; i < includedPaths.length ; i++ ) {
+		var filePath = new CSFilePaths();
+		filePath.skipNestedVolumes = true; // Default value
+		filePath.backupFilePath = includedPaths[i];
+		filePath.excludedFilePaths = physicalMachine.physicalProtectionSource.hostType == 'kWindows' 
+			? escapeToWindowType(filterExcludedPaths(includedPaths[i])) 
+			: filterExcludedPaths(includedPaths[i]);
+		
+		physicalSpecialParam.addFilePatch(filePath); //modified by PCD 
+    }
+    sourceSpecialParam.physicalSpecialParameters = physicalSpecialParam;
+    sourceSpecialParam.sourceId = physicalMachine.id; //added by PCD
+}
+
+// For the SQL Protection
+var envParameters = null;
+if (sqlDbs && sqlDbs.length > 0 && sqlInstance != null) {
+    sourceSpecialParam = new CSSourceSpecialParameters();
+    sourceSpecialParam.sourceId = sqlInstance.id;
+
+    var sqlSpecialParams = new CSSQLSpecialParameters();
+    sqlDbs.forEach(function(s) {
+        sqlSpecialParams.addApplicationEntityId(s.protectionSource.id);
+    });
+    sourceSpecialParam.sqlSpecialParameters = sqlSpecialParams;
+
+    //Special param
+    System.log("Special Param >>> " + sourceSpecialParam);
+
+    // SQL Env Params
+    envParameters = new CSEnvironmentParameters();
+    var sqlParameters = new CSSqlParameters();
+    if (sqlBackupType == "Volume Based") {
+        sqlParameters.userDatabasePreference = "kBackupAllDatabases";
+        sqlParameters.backupSystemDatabases = true;
+        sqlParameters.aagPreferenceFromSqlServer = true;
+        sqlParameters.backupVolumesOnly = false;
+        sqlParameters.backupType = "kSqlVSSVolume";
+        sqlParameters.incrementalSnapshotUponRestart = true;
+    } else {
+        sqlParameters.userDatabasePreference = "kBackupAllDatabases";
+        sqlParameters.backupSystemDatabases = true;
+        sqlParameters.aagPreferenceFromSqlServer = true;
+        sqlParameters.backupType = "kSqlVSSFile";
+
+		// Disable indexing for File Based backup
+		enableIndexing = false;
+    }
+    envParameters.sqlParameters = sqlParameters;
+}
+
+// For Alerting policy
+var alertPolicy = new Array();
+for(var i = 0 ; i < alertingPolicy.length ; i++ ) {
+	alertPolicy.push(prefixKConstant(alertingPolicy[i]));
+}
+
+var viewBoxId = viewBox.id;
+
+// All the protected sourceId
+var sourceIds = new Array();
+if (physicalMachine) {
+	sourceIds.push(Number(physicalMachine.id)); //modified by PCD
+    System.log("found physical machine ID: " + sourceIds[0] + "-->" + physicalMachine.id)
+} else if (virtualMachine) {
+    // For the virtual machines.
+	for(var i = 0; i < virtualMachine.length; i++ ) {
+		sourceIds.push(Number(virtualMachine[i].id));
+	}
+} else {
+    // For all the SQL instances.
+	sourceIds.push(Number(sqlInstance.id));
+}
+
+
+ System.log("found parent source ID: " + parentSourceId)
+
+// The protection job object;
+var protectionJob = new CSProtectionJob();
+protectionJob.displayName = name;
+protectionJob.environment = environment;
+protectionJob.description = description ? description : null;
+protectionJob.parentSourceId = parentSourceId;
+protectionJob.policyId = policyId;
+protectionJob.viewBoxId = viewBoxId;
+protectionJob.timezone = timezone;
+protectionJob.qosType = prefixKConstant(qosType);
+protectionJob.quiesce = quiesce;
+protectionJob.performSourceSideDedup = performSourceSideDedup;
+protectionJob.priority = prefixKConstant(priority);
+protectionJob.alertingPolicy = alertPolicy;
+protectionJob.environmentParameters = envParameters;
+
+// Add the source ids
+//sourceIds.forEach(function (id) {
+//    protectionJob.addSourceIds(id);
+//});
+
+for each (id in sourceIds) {
+    protectionJob.addSourceIds(id);
+}
+
+//protectionJob.addSourceIds(physicalMachine.id);
+
+// All the source special params.
+if (sourceSpecialParam) {
+	protectionJob.addSourceSpecialParameter(sourceSpecialParam);
+}
+
+// indexing policy
+var indexPolicy = new CSIndexingPolicy();
+if (!enableIndexing) {
+    indexPolicy.disableIndexing = true;
+} else {
+    indexPolicy.disableIndexing = false;
+    indexPolicy.allowPrefixes = indexAllowPrefixes;
+    indexPolicy.denyPrefixes = indexDenyPrefixes;
+}
+protectionJob.indexingPolicy = indexPolicy;
+protectionJob.incrementalProtectionSlaTimeMins = incrementalProtectionSlaTimeMins;
+protectionJob.fullProtectionSlaTimeMins = fullProtectionSlaTimeMins;
+
+// Alert config
+var alertConfig = new CSAlertingConfig();
+alertConfig.emailAddresses = alertEmails;
+protectionJob.alertingConfig = alertConfig;
+
+startTime_hour = Number(startTime_hour);
+startTime_minute = Number(startTime_minute);
+
+if (startTime_hour > 23 || startTime_hour < 0) {
+	throw "[Invalid Input] Invalid start time specified.";
+}
+
+if (startTime_minute > 59 || startTime_minute < 0) {
+	throw "[Invalid Input] Invalid start time specified.";
+}
+// Start time of the job.
+var startTime = new CSIncrementalProtectionStartTime();
+startTime.hour = startTime_hour;
+startTime.minute = startTime_minute;
+protectionJob.startTime = startTime;
+
+// If tags are provided for protection.
+if (vmTags && vmTags.length > 0) {
+	return CSProtectionJobManager.createNewProtectionJob(connection, protectionJob, vmTags);
+} else {
+	return CSProtectionJobManager.createNewProtectionJob(connection, protectionJob);
+}]]></script>
+</dunes-script-module>

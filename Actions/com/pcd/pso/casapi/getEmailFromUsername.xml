@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getEmailFromUsername" result-type="string" api-version="6.0.0" id="18f4010b-378f-45f4-b91e-07c54622b44c" version="1.1.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <description><![CDATA[Gets the email of a requester from the org id]]></description>
+  <param n="username" t="string"><![CDATA[requester username]]></param>
+  <param n="orgId" t="string"><![CDATA[organization Id]]></param>
+  <script encoded="false"><![CDATA[var casRestHost = VraHostManager.findHostsByType("vra-onprem")[0];
+System.log("vRA Host " + casRestHost.name + " found successfully!");
+var restClient = casRestHost.createRestClient();
+
+if (!orgId) { throw "No orgId Id provided!"; }
+if (!username) { throw "No username provided!"; }
+
+var url = '/csp/gateway/am/api/users/' + username + '/orgs/' + orgId + '/info';
+var request = restClient.createRequest("GET", url, "");
+         
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Cache-Control", "no-cache");
+        
+var requestResponse = restClient.execute(request);
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Error getting email for user " + username);
+        throw "Error: " +  requestResponse.contentAsString;
+    }
+         
+    jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+    System.log("Inputs are --> " + JSON.stringify(jsonResponse));
+
+    System.log("Email is " + jsonResponse.user.email );
+
+    return jsonResponse.user.email;
+
+
+]]></script>
+</dunes-script-module>

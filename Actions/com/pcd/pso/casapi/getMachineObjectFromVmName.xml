@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getMachineObjectFromVmName" result-type="Properties" api-version="6.0.0" id="292238df-94e4-4a79-affd-52c3071f140b" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <description><![CDATA[returns the VM JSON object from /iaas/api/machines for a specific VM]]></description>
+  <param n="token" t="string"><![CDATA[Bearer Token]]></param>
+  <param n="casRestHost" t="REST:RESTHost"><![CDATA[vRA Rest Host]]></param>
+  <param n="vmName" t="string"><![CDATA[name of VM to look for]]></param>
+  <script encoded="false"><![CDATA[if (!vmName)      { throw "No VM name provided!"; }
+if (!token)       { throw "No Bearer Token provided"; }
+if (!casRestHost) { throw "No CAS REST host provided"; }
+        
+var url = "/iaas/api/machines"
+var filter = "?$filter=name%20eq%20" + "'" + vmName + "'";
+var request = casRestHost.createRequest("GET", url+filter, "");
+   
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Cache-Control", "no-cache");
+request.setHeader("Authorization", "Bearer " + token);
+         
+var requestResponse = request.execute();
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Got Error: " + requestResponse.statusCode);
+        throw "Error: " + JSON.parse(requestResponse.contentAsString);
+;
+    }
+         
+jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+System.log("Found " + jsonResponse.totalElements + " VMs")
+
+if (jsonResponse.totalElements == 1)
+    {
+        return jsonResponse.content[0];
+    }
+
+throw "No Machine Object found for VM " + vmName;
+            
+]]></script>
+</dunes-script-module>

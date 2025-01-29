@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="74a3e9b3-b6c2-4d73-8698-de3045e5f7f1" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[getAccessOrRefreshToken]]></display-name>
+  <description><![CDATA[Gets a CAS access or refresh token. Must provide token type in tokenType (access or refresh)]]></description>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="tokenType" type="string">
+      <description><![CDATA[access or refresh]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="token" type="string"/>
+  </output>
+  <attrib name="casRestHost" type="REST:RESTHost" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="casRestHost"/>
+  <attrib name="username" type="string" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="username">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="password" type="SecureString" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="password"/>
+  <attrib name="domain" type="string" read-only="false" conf-id="1f2e81cb-0c75-432e-8389-cd47113bfb0f" conf-key="domain">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.mdg.pso.casapi/getAccessOrRefreshToken">
+    <display-name><![CDATA[getAccessOrRefreshToken]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.casapi").getAccessOrRefreshToken(username, password, casRestHost, domain, tokenType);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username">
+        <description><![CDATA[CAS user username]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[CAS user password]]></description>
+      </bind>
+      <bind name="casRestHost" type="REST:RESTHost" export-name="casRestHost">
+        <description><![CDATA[CAS URL]]></description>
+      </bind>
+      <bind name="domain" type="string" export-name="domain">
+        <description><![CDATA[CAS user domain]]></description>
+      </bind>
+      <bind name="tokenType" type="string" export-name="tokenType"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="tokenType">
+      <desc><![CDATA[access or refresh]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

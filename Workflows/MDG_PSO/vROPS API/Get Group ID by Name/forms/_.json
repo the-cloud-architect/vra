@@ -1,0 +1,1 @@
+{"schema":{"groupName":{"id":"groupName","type":{"dataType":"string"},"label":"groupName"}},"layout":{"pages":[{"id":"page_u7dzitms","title":"General","sections":[{"id":"section_x28olq4d","fields":[{"id":"groupName","display":"textField","state":{"visible":true,"read-only":false}}]}]}]},"itemId":""}

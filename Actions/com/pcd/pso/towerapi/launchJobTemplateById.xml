@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="launchJobTemplateById" result-type="string" api-version="6.0.0" id="cc321174-cf7b-48e9-a7ce-2f7688b9f34f" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.towerapi">
+  <param n="token" t="string"><![CDATA[Auth Token]]></param>
+  <param n="towerRestHost" t="REST:RESTHost"><![CDATA[tower URL]]></param>
+  <param n="jobTemplateId" t="string"><![CDATA[tower job template id]]></param>
+  <param n="inputVars" t="Properties"><![CDATA[job template inputs]]></param>
+  <param n="limit" t="string"><![CDATA[host to execute on]]></param>
+  <script encoded="false"><![CDATA[if (!token)         { throw "No Access Token provided"; }
+if (!towerRestHost) { throw "No Tower REST host provided"; }
+if (!jobTemplateId) { throw "No Job Template Id provided"; }
+
+var url = "/api/v2/job_templates/"+jobTemplateId+"/launch/";
+
+if (!inputVars) {
+    var requestContent = '{ "limit": ' + limit + ' }'; }
+else {
+    var requestContent = '{ "extra_vars": ' + JSON.stringify(inputVars) + ', "limit": "' + limit + '" }'; }
+
+System.log("REQ = " + requestContent)
+
+var request = towerRestHost.createRequest("POST", url, requestContent);
+         
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Accept", "application/json");
+request.setHeader("Authorization", "Bearer " + token);
+
+var requestResponse = request.execute();
+
+jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+System.debug("response = " + requestResponse.contentAsString);
+
+if(requestResponse.statusCode != 201)
+    {
+        System.log("Unable to launch job template " + jobTemplateId);
+        throw "Error: " + requestResponse.contentAsString;
+    }
+
+System.log("Job ID = " + jsonResponse.id);
+
+return JSON.stringify(jsonResponse.id);
+            
+]]></script>
+</dunes-script-module>

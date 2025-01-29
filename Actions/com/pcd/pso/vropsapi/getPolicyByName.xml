@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getPolicyByName" result-type="string" api-version="6.0.0" id="dd075294-f169-4de7-8e65-05682d56d27c" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vropsapi">
+  <description><![CDATA[Get vROPS access token]]></description>
+  <param n="token" t="string"><![CDATA[Auth Token]]></param>
+  <param n="policyName" t="string"><![CDATA[vROPS Policy Name]]></param>
+  <param n="vropsRestHost" t="REST:RESTHost"><![CDATA[vROPS URL]]></param>
+  <script encoded="false"><![CDATA[if (!token)         { throw "No Access Token provided"; }
+if (!vropsRestHost) { throw "No vROPS REST host provided"; }
+if (!policyName)    { throw "No Policy Name provided"; }
+
+var url = "/suite-api/internal/policies";
+var request = vropsRestHost.createRequest("GET", url, "");
+         
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Accept", "application/json");
+request.setHeader("Authorization", "vRealizeOpsToken " + token);
+request.setHeader("X-vRealizeOps-API-use-unsupported", "true");
+
+var requestResponse = request.execute();
+
+jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+System.debug("OUT = " + requestResponse.contentAsString);
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Unable to get Policy ID for Policy Name: " + policyName);
+        throw "Error: " + requestResponse.contentAsString;
+    }
+         
+for (policy in jsonResponse["policy-summaries"])
+{
+    System.log("Found Policy Name " + jsonResponse["policy-summaries"][policy].name);
+    if ( jsonResponse["policy-summaries"][policy].name == policyName)
+    {
+        var policyId = jsonResponse["policy-summaries"][policy].id;
+        System.log("Policy Id for Policy Name " + policyName + " is " + policyId);
+        return policyId;
+    }
+}
+
+throw "Policy Id for Policy Name " + policyName + " NOT FOUND!";
+
+return null;
+            
+]]></script>
+</dunes-script-module>

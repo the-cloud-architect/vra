@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="6a5544d3-705d-4f9f-a311-ed5030544308" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[eb_Change VM Networking]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="inputProperties" type="Properties"/>
+  </input>
+  <output>
+    <param name="addresses" type="Array/Any"/>
+    <param name="gateways" type="Array/Array"/>
+  </output>
+  <attrib name="username" type="string" read-only="false">
+    <value encoded="n"><![CDATA[mdegrasse@pcdlab.com]]></value>
+  </attrib>
+  <attrib name="password" type="string" read-only="false">
+    <value encoded="n"><![CDATA[_alibaba0]]></value>
+  </attrib>
+  <attrib name="cspRestHost" type="string" read-only="false">
+    <value encoded="n"><![CDATA[https://vra8-node1.ucp.local]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="660.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[
+
+
+
+
+addresses = new Array();
+gateways = new Array();
+
+
+//hard code IP addresses after doing some external or internal processing
+
+
+addresses.push(["172.35.70.25"]); 
+addresses.push(["172.35.70.26"]);
+
+//gateways.push();
+//gateways.push();
+]]></script>
+    <in-binding>
+      <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+    </in-binding>
+    <out-binding>
+      <bind name="addresses" type="Array/Any" export-name="addresses"/>
+      <bind name="gateways" type="Array/Array" export-name="gateways"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="180.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="task">
+    <runtime><![CDATA[python:3.7]]></runtime>
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[import json
+
+def handler(context, inputs):
+
+    #get number of resources (typicaly VM instances of the same type)
+    numResources = len(inputs['inputProperties']['externalIds'])
+    print("found {0} resources.".format(numResources))
+    for externalId in inputs['inputProperties']['externalIds']:
+        print("     externalId -> ", externalId)
+    
+    return]]></script>
+    <in-binding>
+      <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="320.0"/>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item0" type="task">
+    <runtime><![CDATA[python:3.7]]></runtime>
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[import json
+
+def handler(context, inputs):
+    if inputs['username'] and inputs['password']:
+        if inputs['cspRestHost']:
+                url = "/csp/gateway/am/api/login?access_token"
+                requestContent = { 'username':inputs['username'], 'password':inputs['password'] }
+                print("gogogo ", requestContent)
+
+        else:
+             print("Bad REST host!")
+    else:
+         print("Bad username or password!")]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username"/>
+      <bind name="password" type="string" export-name="password"/>
+      <bind name="inputProperties" type="Properties" export-name="inputProperties"/>
+      <bind name="cspRestHost" type="string" export-name="cspRestHost"/>
+    </in-binding>
+    <out-binding/>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="420.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getProjectsAsProperties" result-type="Array/Properties" api-version="6.0.0" id="366f61bb-d825-410c-9af6-ab3ab078a358" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vra">
+  <script encoded="false"><![CDATA[var vraHost = VraHostManager.findHostsByType("vra-onprem")[0];
+var projects = VraEntitiesFinder.getProjects(vraHost);
+
+var projectsProperties = new Array();
+
+for each (var project in projects) {
+  System.log("found project " + project.name + ".");
+    projectsProperties.push(new Properties({value: project.name, label: project.name}));
+}
+
+// Sort the entries array using the comparator function
+projectsProperties.sort(compareEntries);
+
+return projectsProperties;
+
+// Define a comparator function that compares the 'name' attribute of each entry
+function compareEntries(a, b) {
+  var nameA = a.label;
+  var nameB = b.label;
+  return nameA.localeCompare(nameB);
+}]]></script>
+</dunes-script-module>

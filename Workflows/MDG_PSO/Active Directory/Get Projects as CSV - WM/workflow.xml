@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="0358f57c-b1fb-4fd8-98a8-517a8167086c" editor-version="2.0" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" restartMode="1" resumeFromFailedMode="0">
+    <display-name>Get Projects as CSV - WM</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="username" type="string"/>
+        <param name="projectName" type="string"/>
+    </input>
+    <output>
+        <param name="groupCSV" type="string"/>
+    </output>
+    <attrib name="baseDN" type="string">
+        <value encoded="n">OU=Accounts,OU=Aria Automation,DC=convergelabs,DC=ca</value>
+    </attrib>
+    <attrib name="groupProps" type="Array/Properties">
+        <value encoded="n">[]</value>
+    </attrib>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="580.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item2" type="task" script-module="com.mdg.pso.activeDirectory/getGroupsFromADHost" comparator="0">
+        <display-name>getGroupsFromADHost</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.activeDirectory").getGroupsFromADHost(filter, baseDN);
+</script>
+        <in-binding>
+            <bind name="filter" type="string" export-name="">
+                <description>filter to be added to ldap query</description>
+            </bind>
+            <bind name="baseDN" type="string" export-name="baseDN">
+                <description>base DN to search from (optional)</description>
+            </bind>
+        </in-binding>
+        <out-binding>
+            <bind name="actionResult" type="Array/Properties" export-name="groupProps"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="60.0" x="200.0"/>
+    </workflow-item>
+    <workflow-item name="item2" out-name="item0" type="task" script-module="com.pcd.pso.activeDirectory/convertPropsArrayToString_f" comparator="0">
+        <display-name>convertPropsArrayToString_f</display-name>
+        <script encoded="false">//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.activeDirectory").convertPropsArrayToString_f(props);
+</script>
+        <in-binding>
+            <bind name="props" type="Array/Properties" export-name="groupProps"/>
+        </in-binding>
+        <out-binding>
+            <bind name="actionResult" type="string" export-name="groupCSV"/>
+        </out-binding>
+        <description>Add a note to the workflow schema.</description>
+        <position y="60.0" x="380.0"/>
+    </workflow-item>
+</ns2:workflow>

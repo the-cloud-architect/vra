@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="createCustomGroupWithTagMembers" result-type="string" api-version="6.0.0" id="db9be6e3-71f5-47be-84fa-6dd16a720102" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vropsapi">
+  <description><![CDATA[create vROPS custom group with members who have tag category and tag names matching the input values.
+
+returns the ID of the created group]]></description>
+  <param n="token" t="string"><![CDATA[Auth Token]]></param>
+  <param n="vropsRestHost" t="REST:RESTHost"><![CDATA[vROPS URL]]></param>
+  <param n="groupName" t="string"><![CDATA[custom group name to create]]></param>
+  <param n="tagCategory" t="string"><![CDATA[tag category members]]></param>
+  <param n="tagName" t="string"><![CDATA[tag name members]]></param>
+  <script encoded="false"><![CDATA[if (!token)         { throw "No Access Token provided"; }
+if (!vropsRestHost) { throw "No vROPS REST host provided"; }
+if (!groupName)     { throw "No Group Name provided"; }
+if (!tagCategory)   { throw "No Tag Category provided"; }
+if (!tagName)       { throw "No Tag Name provided"; }
+
+var url = "/suite-api/api/resources/groups";
+
+var tagValue = "<" + tagCategory + "-" + tagName + ">";
+
+var requestContent =
+{
+  "resourceKey" : {
+    "name" : groupName,
+    "adapterKindKey" : "Container",
+    "resourceKindKey" : "Environment"
+  },
+  "autoResolveMembership" : true,
+  "membershipDefinition" : {
+    "includedResources" : [ ],
+    "excludedResources" : [ ],
+    "custom-group-properties" : [ ],
+    "rules" : [ {
+      "resourceKindKey" : {
+        "resourceKind" : "VirtualMachine",
+        "adapterKind" : "VMWARE"
+      },
+      "propertyConditionRules" : [ {
+        "key" : "summary|tag",
+        "stringValue" : tagValue,
+        "compareOperator" : "CONTAINS"
+      } ]
+    } ]
+  }
+}
+
+System.log("requestContent = " + JSON.stringify(requestContent) );
+
+var request = vropsRestHost.createRequest("POST", url, JSON.stringify(requestContent));
+
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Accept", "application/json");
+request.setHeader("Authorization", "vRealizeOpsToken " + token);
+request.setHeader("X-vRealizeOps-API-use-unsupported", "true");
+
+var requestResponse = request.execute();
+
+if(requestResponse.statusCode != 201)
+    {
+        System.log("Unable to create group name " + groupName + ". Status Code = " + requestResponse.statusCode);
+        throw "Error: " + requestResponse.contentAsString;
+    }
+
+jsonResponse = JSON.parse(requestResponse.contentAsString)
+        
+return jsonResponse.id;
+            
+]]></script>
+</dunes-script-module>

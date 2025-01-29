@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getAdHostByHostname" result-type="AD:AdHost" api-version="6.0.0" id="e345ec26-460a-4b7b-8d47-d8e156752ed7" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.activeDirectory">
+  <param n="hostname" t="string"/>
+  <script encoded="false"><![CDATA[   var hosts = AD_HostManager.findAllHosts()
+   for (idx in hosts) {
+      var host = hosts[idx]
+      System.log("Found host " + host.hostConfiguration.host + " with ID " + host.hostConfiguration.id)   
+      if (hostname) {
+        if ( host.hostConfiguration.host == hostname)
+        {
+            System.log("Got it!! " + hostname)   
+            return host
+        } 
+     }
+     else {
+        {
+            System.log("No hostname specified, returning first one!! " + hostname)   
+            return host
+        }
+     }
+   }
+]]></script>
+</dunes-script-module>

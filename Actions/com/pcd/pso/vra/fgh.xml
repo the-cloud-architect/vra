@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="fgh" result-type="string" api-version="6.0.0" id="54856384-6b13-41ae-a422-af880ff9bacb" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vra">
+  <runtime><![CDATA[powershell:7.4]]></runtime>
+  <param n="input" t="string"/>
+  <param n="input_1" t="string"/>
+  <script encoded="false"><![CDATA[function Handler($context, $inputs) {
+    $inputsString = $inputs | ConvertTo-Json -Compress
+
+    Write-Host "Inputs were $inputsString"
+
+    $output=@{status = 'done'}
+
+    return $output
+}
+]]></script>
+</dunes-script-module>

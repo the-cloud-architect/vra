@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="eed5f1da-e705-4b50-8e38-35052a67cc08" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Get Policy ID by Name]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="policyName" type="string"/>
+  </input>
+  <output>
+    <param name="policyId" type="string"/>
+  </output>
+  <attrib name="token" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="username" type="string" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="username">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="password" type="SecureString" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="password"/>
+  <attrib name="vropsRestHost" type="REST:RESTHost" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="vropsRestHost"/>
+  <attrib name="authSource" type="string" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="authSource">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="410.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task" script-module="com.mdg.pso.vropsapi/getAccessToken">
+    <display-name><![CDATA[getAccessToken]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.vropsapi").getAccessToken(username, password, vropsRestHost, authSource);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username">
+        <description><![CDATA[vROPS user username]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[vROPS user password]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+      <bind name="authSource" type="string" export-name="authSource">
+        <description><![CDATA[vROPS Auth Source]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="170.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task" script-module="com.pcd.pso.vropsapi/getPolicyByName">
+    <display-name><![CDATA[get policy id]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.vropsapi").getPolicyByName(token,policyName,vropsRestHost);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="policyName" type="string" export-name="policyName">
+        <description><![CDATA[vROPS Policy Name]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="policyId"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="275.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="policyName">
+      <desc><![CDATA[policyName]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

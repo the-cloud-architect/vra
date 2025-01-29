@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getBearerToken" result-type="string" api-version="6.0.0" id="205b6b47-c976-4f5f-9c43-6d91d04afe47" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <param n="username" t="string"/>
+  <param n="password" t="Any"/>
+  <param n="domain" t="string"/>
+  <param n="casRestHost" t="REST:RESTHost"/>
+  <script encoded="false"><![CDATA[
+
+var refreshToken = System.getModule("com.pcd.pso.casapi").getAccessOrRefreshToken(username, password, casRestHost, domain, "refresh");
+
+System.debug("Got refresh token : " + refreshToken);
+
+var bearerToken = System.getModule("com.pcd.pso.casapi").getBearerTokenFromRefreshToken(refreshToken,casRestHost);
+
+return bearerToken;
+
+]]></script>
+</dunes-script-module>

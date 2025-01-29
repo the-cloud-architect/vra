@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="1826c5dd-8ba6-4b25-a484-ef87ba5f99a4" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Delete Custom Group By Name]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="groupName" type="string">
+      <description><![CDATA[Group Name to delete]]></description>
+    </param>
+  </input>
+  <attrib name="vropsRestHost" type="REST:RESTHost" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="vropsRestHost"/>
+  <attrib name="username" type="string" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="username">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="password" type="SecureString" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="password"/>
+  <attrib name="authSource" type="string" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="authSource">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="token" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="groupId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="540.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item11" type="task" script-module="com.mdg.pso.vropsapi/getAccessToken">
+    <display-name><![CDATA[getAccessToken]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.vropsapi").getAccessToken(username, password, vropsRestHost, authSource);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username">
+        <description><![CDATA[vROPS user username]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[vROPS user password]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+      <bind name="authSource" type="string" export-name="authSource">
+        <description><![CDATA[vROPS Auth Source]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <workflow-item name="item10" out-name="item0" type="task" script-module="com.mdg.pso.vropsapi/deleteCustomGroupById">
+    <display-name><![CDATA[deleteCustomGroupById]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.vropsapi").deleteCustomGroupById(token, vropsRestHost, groupId);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+      <bind name="groupId" type="string" export-name="groupId">
+        <description><![CDATA[custom group id to delete]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name=""/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="380.0"/>
+  </workflow-item>
+  <workflow-item name="item11" out-name="item10" type="task" script-module="com.pcd.pso.vropsapi/getGroupIdByName">
+    <display-name><![CDATA[get group Id]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.vropsapi").getGroupIdByName(token,groupName,vropsRestHost);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="groupName" type="string" export-name="groupName">
+        <description><![CDATA[vROPS Group Name]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="groupId"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="270.0"/>
+  </workflow-item>
+  <presentation>
+    <p-param name="groupName">
+      <desc><![CDATA[Group Name to delete]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

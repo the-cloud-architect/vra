@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="192a4703-3576-4287-9f5e-8c5a792734a9" version="0.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Launch Job Template]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="jobTemplateName" type="string"/>
+    <param name="targetHost" type="string"/>
+    <param name="extraVars" type="Properties"/>
+  </input>
+  <output>
+    <param name="results" type="string"/>
+  </output>
+  <attrib name="towerRestHost" type="REST:RESTHost" read-only="false">
+    <value encoded="n"><![CDATA[dunes://service.dunes.ch/CustomSDKObject?id='74deb92f-daf6-4fa0-8e5e-667096832863'&dunesName='REST:RESTHost']]></value>
+    <description><![CDATA[tower URL]]></description>
+  </attrib>
+  <attrib name="token" type="string" read-only="false">
+    <value encoded="n"><![CDATA[rueXdj6CdYyLKwCmWHD4aZfgvpG5Oy]]></value>
+  </attrib>
+  <attrib name="jobTemplateId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[tower job template id]]></description>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="520.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task" script-module="com.pcd.pso.towerapi/getJobTemplateIdByName">
+    <display-name><![CDATA[getJobTemplateIdByName]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.towerapi").getJobTemplateIdByName(token,towerRestHost,jobTemplateName);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token"/>
+      <bind name="towerRestHost" type="REST:RESTHost" export-name="towerRestHost"/>
+      <bind name="jobTemplateName" type="string" export-name="jobTemplateName"/>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="jobTemplateId"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="200.0"/>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item0" type="task" script-module="com.pcd.pso.towerapi/launchJobTemplateById">
+    <display-name><![CDATA[launchJobTemplateById]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.pcd.pso.towerapi").launchJobTemplateById(token,towerRestHost,jobTemplateId,inputVars,limit);
+]]></script>
+    <in-binding>
+      <bind name="token" type="string" export-name="token">
+        <description><![CDATA[Auth Token]]></description>
+      </bind>
+      <bind name="towerRestHost" type="REST:RESTHost" export-name="towerRestHost">
+        <description><![CDATA[tower URL]]></description>
+      </bind>
+      <bind name="jobTemplateId" type="string" export-name="jobTemplateId">
+        <description><![CDATA[tower job template id]]></description>
+      </bind>
+      <bind name="inputVars" type="Properties" export-name="extraVars">
+        <description><![CDATA[job template inputs]]></description>
+      </bind>
+      <bind name="limit" type="string" export-name="targetHost">
+        <description><![CDATA[host to execute on]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="results"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="360.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

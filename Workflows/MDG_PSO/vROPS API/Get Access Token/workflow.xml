@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="4aca3be8-c35e-429b-a1dd-1124893971cd" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Get Access Token]]></display-name>
+  <description><![CDATA[Gets a vROPS access token. ]]></description>
+  <position y="50.0" x="100.0"/>
+  <output>
+    <param name="token" type="string"/>
+  </output>
+  <attrib name="vropsRestHost" type="REST:RESTHost" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="vropsRestHost"/>
+  <attrib name="username" type="string" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="username">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="password" type="SecureString" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="password"/>
+  <attrib name="authSource" type="string" read-only="false" conf-id="b785fbd6-7e63-4b9e-82db-12721ca62cd6" conf-key="authSource">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="300.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task" script-module="com.mdg.pso.vropsapi/getAccessToken">
+    <display-name><![CDATA[getAccessToken]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.mdg.pso.vropsapi").getAccessToken(username, password, vropsRestHost, authSource);
+]]></script>
+    <in-binding>
+      <bind name="username" type="string" export-name="username">
+        <description><![CDATA[vROPS user username]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="password">
+        <description><![CDATA[vROPS user password]]></description>
+      </bind>
+      <bind name="vropsRestHost" type="REST:RESTHost" export-name="vropsRestHost">
+        <description><![CDATA[vROPS URL]]></description>
+      </bind>
+      <bind name="authSource" type="string" export-name="authSource">
+        <description><![CDATA[vROPS Auth Source]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="token"/>
+    </out-binding>
+    <description><![CDATA[Add a note to the workflow schema.]]></description>
+    <position y="60.0" x="160.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

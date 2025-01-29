@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getAllAccountOUs" result-type="Array/Properties" api-version="6.0.0" id="ce71d6ec-1b2b-469a-9be4-9b8ee3cf85b8" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.activeDirectory">
+  <script encoded="false"><![CDATA[var props1;
+var props2;
+
+props1 = System.getModule("com.pcd.pso.activeDirectory").getOUsFromADHost("*Accounts","OU=Accounts,OU=Aria Automation,DC=convergelabs,DC=ca")
+props2 = System.getModule("com.pcd.pso.activeDirectory").getOUsFromADHost("*", "OU=Hosts,OU=Aria Automation,DC=convergelabs,DC=ca")
+
+return props1.concat(props2);]]></script>
+</dunes-script-module>

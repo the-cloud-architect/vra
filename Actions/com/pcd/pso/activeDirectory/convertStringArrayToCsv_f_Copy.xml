@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="convertStringArrayToCsv_f_Copy" result-type="string" api-version="6.0.0" id="cc02a661-5a53-4141-bf9e-cb5c7e949975" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.activeDirectory">
+  <param n="props" t="Array/string"/>
+  <script encoded="false"><![CDATA[//return csv list of strings
+if (props)   { 
+      return props.toString(); 
+  }
+else {
+    return "";
+}]]></script>
+</dunes-script-module>

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="generateDeploymentName" result-type="string" api-version="6.0.0" id="978dab58-ec44-4579-aa94-1a83ece4b354" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.vra.utilities">
+  <param n="catalogItemName" t="string"/>
+  <param n="requesterName" t="string"/>
+  <script encoded="false"><![CDATA[var itemName = catalogItemName || "";
+var reqName = requesterName || "";
+var deploymentName = "";
+
+if (itemName != "" && itemName != null && reqName != null && reqName != "") {
+    var date = new Date();
+    deploymentName = itemName + " -" + reqName.toUpperCase() + "- (" + date.toISOString() + ")";
+    System.debug("Returning deploymentName: " + deploymentName);
+}
+
+return deploymentName;]]></script>
+</dunes-script-module>

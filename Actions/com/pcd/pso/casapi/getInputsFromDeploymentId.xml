@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getInputsFromDeploymentId" result-type="Properties" api-version="6.0.0" id="a5eb5204-7461-4c87-b40e-3f0675673d64" version="2.0.0" allowed-operations="vfe" category-name="com.pcd.pso.casapi">
+  <description><![CDATA[Gets the inputs passed to a specific deployment ID]]></description>
+  <param n="deploymentId" t="string"><![CDATA[deployment Id]]></param>
+  <script encoded="false"><![CDATA[if (!deploymentId)      { throw "No deployment Id provided!"; }
+
+var vraHost = VraHostManager.findHostsByType("vra-onprem")[0];
+var vraRestClient = vraHost.createRestClient();
+
+var url = "/deployment/api/deployments/"+deploymentId;
+var request = vraRestClient.createRequest("GET", url, "");
+         
+//request.setHeader("Content-Type", "application/json");
+//request.setHeader("Cache-Control", "no-cache");
+        
+var requestResponse = vraRestClient.execute(request);
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Error fetching information for deployment Id : " + deploymentId);
+        throw "Error: " + requestResponse.contentAsString;
+    }
+         
+    jsonResponse = JSON.parse(requestResponse.contentAsString);
+
+    if (!jsonResponse.inputs)
+    {
+        throw "No inputs found for deploymentId " + deploymentId;
+     
+    }
+
+    System.log("Inputs are --> " + JSON.stringify(jsonResponse.inputs));
+
+    return jsonResponse.inputs;
+]]></script>
+</dunes-script-module>

@@ -1,0 +1,1 @@
+{"schema":{"deploymentId":{"id":"deploymentId","type":{"dataType":"string"},"label":"deploymentId"}},"layout":{"pages":[{"id":"page_jnb8hilm","title":"General","sections":[{"id":"section_lq8w730i","fields":[{"id":"deploymentId","display":"textField","state":{"visible":true,"read-only":false}}]}]}]},"itemId":""}

@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getPhysicalServerProtectionJob" result-type="CS:ProtectionJob" api-version="6.0.0" id="7e736383-b9d9-47c4-82f4-be00df8e1190" version="1.0.0" allowed-operations="vfe" category-name="com.pcd.pso.cohesity">
+  <description><![CDATA[Returns Cohesoty Protection Job Object for given Protection Job Name for physical servers]]></description>
+  <param n="connection" t="CS:CohesityConnection"><![CDATA[Cohesity Endpoint]]></param>
+  <param n="protectionJobName" t="string"><![CDATA[Protection Job Name]]></param>
+  <script encoded="false"><![CDATA[var currentprotectionJob = null;
+if(!connection)
+{
+	// non presentation action
+	throw "Cohesity Endpoint is null.";
+}
+
+if(!protectionJobName)
+{
+	throw "Protection Job Name is null."
+}
+
+// All active and non deleted pJobs
+var protectionJobList = System.getModule("com.cohesity.plugin.protectionJob").getAllNonDeletedProtectionJobObjects(connection,null,null,null);
+for(i =0; i<protectionJobList.length; i++)
+{
+	if(protectionJobList[i].displayName == protectionJobName)
+	{
+		currentprotectionJob = protectionJobList[i];
+	}	
+}
+
+if(currentprotectionJob == null)
+{
+	var msg = "The '"+ protectionJobName +"' is not present in Cohesity Protection Job List";
+	System.error(msg);
+	throw msg;
+}
+return currentprotectionJob;]]></script>
+</dunes-script-module>

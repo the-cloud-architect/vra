@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="convertPropsArrayToString_f" result-type="string" api-version="6.0.0" id="7896d4cd-9371-4658-91ce-9d8a49ce15e1" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.activeDirectory">
+  <param n="props" t="Array/Properties"/>
+  <script encoded="false"><![CDATA[var csv = "";
+
+for (var prop in props) {
+    csv += props[prop].value + ",";
+    System.log("Found prop: label : " + props[prop].label + " : value : " + props[prop].value)
+}
+
+//return csv list of projects
+return csv.slice(0,-1);]]></script>
+</dunes-script-module>

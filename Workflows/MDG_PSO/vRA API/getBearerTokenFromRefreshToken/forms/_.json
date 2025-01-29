@@ -1,0 +1,1 @@
+{"schema":{"refreshToken":{"id":"refreshToken","type":{"dataType":"string"},"label":"refreshToken","constraints":{"required":false}}},"layout":{"pages":[{"id":"page_hipt9z8x","title":"General","sections":[{"id":"section_v5slce77","fields":[{"id":"refreshToken","display":"textField"}]}]}]},"itemId":""}

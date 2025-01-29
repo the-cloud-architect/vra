@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="deleteCustomGroupByName" result-type="string" api-version="6.0.0" id="c98c1ead-441d-4224-a7a2-728444ee8828" version="0.0.2" allowed-operations="vfe" category-name="com.pcd.pso.vropsapi">
+  <description><![CDATA[delete vROPS custom group specified by group name]]></description>
+  <param n="token" t="string"><![CDATA[Auth Token]]></param>
+  <param n="vropsRestHost" t="REST:RESTHost"><![CDATA[vROPS URL]]></param>
+  <param n="groupName" t="string"><![CDATA[custom group id to delete]]></param>
+  <script encoded="false"><![CDATA[if (!token)         { throw "No Access Token provided"; }
+if (!vropsRestHost) { throw "No vROPS REST host provided"; }
+if (!groupName)     { throw "No Group Id provided"; }
+
+var groupId = System.getModule("com.pcd.pso.vropsapi").getGroupIdByName(token, groupName, vropsRestHost)
+
+var url = "/suite-api/api/resources/groups/"+groupId;
+
+var request = vropsRestHost.createRequest("DELETE", url, "");
+
+request.setHeader("Content-Type", "application/json");
+request.setHeader("Accept", "application/json");
+request.setHeader("Authorization", "vRealizeOpsToken " + token);
+request.setHeader("X-vRealizeOps-API-use-unsupported", "true");
+
+var requestResponse = request.execute();
+
+if(requestResponse.statusCode != 200)
+    {
+        System.log("Unable to delete group id " + groupId + ". Status Code = " + requestResponse.statusCode);
+        throw "Error: " + requestResponse.contentAsString;
+    }
+        
+return requestResponse.statusCode;
+            
+]]></script>
+</dunes-script-module>

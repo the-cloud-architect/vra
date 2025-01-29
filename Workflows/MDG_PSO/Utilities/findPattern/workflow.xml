@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="daff0faf-97ea-45b3-81ae-d71108e582d0" version="1.0.0" api-version="6.0.0" allowed-operations="vfe" editor-version="2.0" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[findPattern]]></display-name>
+  <position y="50.0" x="100.0"/>
+  <input>
+    <param name="pattern" type="string"/>
+    <param name="inputString" type="string"/>
+  </input>
+  <output>
+    <param name="found" type="boolean"/>
+  </output>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <in-binding/>
+    <position y="50.0" x="340.0"/>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Scriptable task]]></display-name>
+    <script encoded="false"><![CDATA[if ( inputString.search(eval(pattern)) > 0) {
+    System.log("Found pattern " + pattern + " in string " + inputString)
+    found = true;
+}
+else { 
+        System.log("Pattern " + pattern + " in string " + inputString + "Not found!")
+        found = false;
+
+}]]></script>
+    <in-binding>
+      <bind name="pattern" type="string" export-name="pattern"/>
+      <bind name="inputString" type="string" export-name="inputString"/>
+    </in-binding>
+    <out-binding>
+      <bind name="found" type="boolean" export-name="found"/>
+    </out-binding>
+    <description><![CDATA[Simple task with custom script capability.]]></description>
+    <position y="60.0" x="180.0"/>
+  </workflow-item>
+  <presentation/>
+</workflow>

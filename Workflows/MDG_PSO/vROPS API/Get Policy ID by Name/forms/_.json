@@ -1,0 +1,1 @@
+{"schema":{"policyName":{"id":"policyName","type":{"dataType":"string"},"label":"policyName","constraints":{"required":false}}},"layout":{"pages":[{"id":"page_u7dzitms","title":"General","sections":[{"id":"section_x28olq4d","fields":[{"id":"policyName","display":"textField","state":{"visible":true,"read-only":false}}]}]}]},"itemId":""}

@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="getGroupsFromADHost" result-type="Array/Properties" api-version="6.0.0" id="be1a23bd-e777-4254-8906-be840741b74e" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.activeDirectory">
+  <param n="filter" t="string"><![CDATA[filter to be added to ldap query]]></param>
+  <param n="baseDN" t="string"><![CDATA[base DN to search from (optional)]]></param>
+  <script encoded="false"><![CDATA[
+// Configure attributes that need returned from AD
+var ATTRIBS = ['canonicalName', 'name'];
+
+// Get AD Host object from AD plugin library
+var adHost = System.getModule("com.pcd.pso.activeDirectory").getAdHostByHostname("dc1.convergelabs.ca")
+
+// Search base/root OU where server computer objects are
+
+// Search base/root OU where server computer objects are
+if (baseDN) { var ldapDn = baseDN; } else { var ldapDn = adHost.hostConfiguration.ldapBase; }
+System.log("Base DN search for this AD host is: " + ldapDn)
+
+if (filter) { var ldapFilter = filter; } else { var ldapFilter = "*"; }
+System.log("search filter is : " + ldapFilter)
+
+// Connect and query AD for OUs under base OU
+var ldapClient = adHost.getLdapClient();
+var searchResults = ldapClient.search(ldapDn, LdapSearchScope.SUB, LdapDereferencePolicy.NEVER, 99999, 0, "&(objectClass=Group)(name=*)", ATTRIBS);
+var entries = searchResults.getSearchEntries();
+var adGroups = new Array();
+
+// Define a comparator function that compares the 'name' attribute of each entry
+function compareEntries(a, b) {
+  var nameA = a.getAttributeValues("canonicalName")[0];
+  var nameB = b.getAttributeValues("canonicalName")[0];
+  return nameA.localeCompare(nameB);
+}
+ 
+// Sort the entries array using the comparator function
+entries.sort(compareEntries);
+
+// Loop through the entries and append the sub-organizational unit path to each name
+for each (var entry in entries) {
+    var name = entry.getAttributeValues("name")[0];
+    var cname = entry.getAttributeValues("canonicalName")[0];
+ 
+    // Remove "domain name" from the cname
+    firstParentIndex = cname.indexOf("/")
+    cname = cname.substring(firstParentIndex, cname.length)
+    
+    // Log output for debugging
+    System.log(cname);
+    System.log("    Group Name-> " + name);
+    // Add the cname and name pair to the adGroups array
+    adGroups.push(new Properties({value: name, label: cname}));
+}
+
+return adGroups;]]></script>
+</dunes-script-module>

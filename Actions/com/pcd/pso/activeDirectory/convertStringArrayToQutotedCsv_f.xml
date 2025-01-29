@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dunes-script-module name="convertStringArrayToQutotedCsv_f" result-type="string" api-version="6.0.0" id="540f9cc0-246a-4c19-b0d8-c280285bcfb4" version="0.0.0" allowed-operations="vfe" category-name="com.pcd.pso.activeDirectory">
+  <param n="props" t="Array/string"/>
+  <script encoded="false"><![CDATA[//return csv list of strings, each quoted individually
+var returnString = "";
+if (props)   { 
+      props.forEach(function (item) {
+        returnString += "\""+item+"\",";
+      });
+    return returnString.slice(0,-1);;
+  }
+else {
+    return "";
+}
+]]></script>
+</dunes-script-module>
