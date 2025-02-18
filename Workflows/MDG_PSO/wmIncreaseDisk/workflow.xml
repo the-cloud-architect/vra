@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:workflow xmlns:ns2="http://vmware.com/vco/workflow" root-name="item1" object-name="workflow:name=generic" id="3c203b88-dccf-4938-a7ca-d403af2db0e6" editor-version="2.0" version="0.0.1" api-version="6.0.0" restartMode="1" resumeFromFailedMode="0">
+    <display-name>wmIncreaseDisk</display-name>
+    <position y="50.0" x="100.0"/>
+    <input>
+        <param name="vm" type="VC:VirtualMachine">
+            <description>vm to be resized</description>
+        </param>
+        <param name="newSizeGB" type="number">
+            <description>the size of disk after the action</description>
+        </param>
+    </input>
+    <output/>
+    <workflow-item name="item0" type="end" end-mode="0" comparator="0">
+        <in-binding/>
+        <out-binding/>
+        <position y="50.0" x="300.0"/>
+    </workflow-item>
+    <workflow-item name="item1" out-name="item0" type="task" comparator="0">
+        <display-name>Scriptable task</display-name>
+        <script encoded="false">// Ensure inputs are defined&#13;
+if (!vm || !newSizeGB) {&#13;
+    throw "Missing required inputs: vm or newSizeGB";&#13;
+}&#13;
+&#13;
+var diskIndex = 0;  // Change if you want to resize a specific disk&#13;
+var devices = vm.config.hardware.device;&#13;
+var diskFound = false;&#13;
+&#13;
+for (var i in devices) {&#13;
+    if (devices[i] instanceof VcVirtualDisk) {&#13;
+        if (diskIndex == 0) {&#13;
+            System.log("Resizing disk: " + devices[i].deviceInfo.label);&#13;
+            devices[i].capacityInKB = newSizeGB * 1024 * 1024;&#13;
+            diskFound = true;&#13;
+            break;&#13;
+        }&#13;
+        diskIndex--;&#13;
+    }&#13;
+}&#13;
+&#13;
+if (!diskFound) {&#13;
+    throw "No virtual disk found on the VM!";&#13;
+}&#13;
+&#13;
+// Create a VM reconfiguration spec&#13;
+var spec = new VcVirtualMachineConfigSpec();&#13;
+spec.deviceChange = [new VcVirtualDeviceConfigSpec()];&#13;
+spec.deviceChange[0].device = devices[i];&#13;
+spec.deviceChange[0].operation = VcVirtualDeviceConfigSpecOperation.edit;&#13;
+&#13;
+// Apply the disk resize operation&#13;
+System.log("Submitting reconfigVM_Task...");&#13;
+var task = vm.reconfigVM_Task(spec);&#13;
+&#13;
+// Monitor the task&#13;
+System.getModule("com.vmware.library.vc.basic").vim3WaitTaskEnd(task, true, 10);&#13;
+System.log("Disk resize completed successfully!");&#13;
+</script>
+        <in-binding/>
+        <out-binding/>
+        <description>Simple task with custom script capability.</description>
+        <position y="60.0" x="150.0"/>
+    </workflow-item>
+</ns2:workflow>
